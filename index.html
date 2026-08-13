@@ -309,7 +309,7 @@ details.dlog[open]>summary::before{content:"▾ "}
     <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
     <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
     <span class="pill"><b>120</b> players ranked</span>
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 3:02 PM</b></span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 3:07 PM</b></span>
     <span class="pill" id="pillLeague"></span>
   </div>
   <div class="hdrctl">
@@ -351,6 +351,8 @@ details.dlog[open]>summary::before{content:"▾ "}
         <option value="2">Superflex / 2 QB</option>
       </select>
     </label>
+    <label class="chk" id="lgQB2Wrap"><input type="checkbox" id="lgQB2" checked>
+      Reserve a late pick for a backup QB (bye &amp; injury cover)</label>
     <span id="lgNote" class="sub" style="font-size:12.5px;align-self:center"></span>
   </div>
 </div>
@@ -524,7 +526,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 </div>
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T15:01:42</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T15:02:56</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -569,6 +571,7 @@ function syncSimCfg(){
   SIMCFG.rounds   = roundsCount();
   SIMCFG.replIdx  = replIdx();
   SIMCFG.caps     = { QB: (LG.qb>=2 ? 4 : 2), RB:6, WR:7, TE:2, K:1, DEF:1 };
+  SIMCFG.wantQB   = wantQB();
   return SIMCFG;
 }
 
@@ -719,8 +722,17 @@ function runSim(pool, slot, sims, useRisk, seed, state){
       }
 
       var chosen=-1;
-      var mustK = (rounds-round) < 1 && ros.K.length===0;
-      var mustD = (rounds-round) < 1 && ros.DEF.length===0;
+      // Roster slots that MUST still be filled before the draft ends. If the number of
+      // remaining picks equals the number of outstanding must-haves, stop taking
+      // anything else. (The old version forced K and DEF in the same final round, so
+      // whichever lost the tie was simply never drafted.)
+      var mustList=[];
+      if(ros.DEF.length < 1) mustList.push('DEF');
+      if(ros.K.length   < 1) mustList.push('K');
+      if(isMine && ros.QB.length < SIMCFG.wantQB) mustList.push('QB');
+      else if(!isMine && ros.QB.length < SIMCFG.starters.QB) mustList.push('QB');
+      var picksLeftForTeam = Math.ceil((totalPicks - pick + 1) / teams);
+      var forcePos = (mustList.length && picksLeftForTeam <= mustList.length) ? mustList[0] : null;
       var lastTwo = (rounds-round) <= 1;
 
       if(!isMine){
@@ -729,8 +741,7 @@ function runSim(pool, slot, sims, useRisk, seed, state){
           var pi=idx[k]; if(taken[pi]) continue;
           var pp=pool[pi];
           if(!canTake(ros,pp.pos,round)) continue;
-          if(lastTwo && ros.K.length===0 && pp.pos!=='K' && ros.DEF.length>0) continue;
-          if(round>=rounds-2 && ros.QB.length<SIMCFG.starters.QB && pp.pos!=='QB') continue;
+          if(forcePos && pp.pos!==forcePos) continue;
           chosen=pi; break;
         }
       } else {
@@ -740,14 +751,13 @@ function runSim(pool, slot, sims, useRisk, seed, state){
           var pj=idx[k2]; if(taken[pj]) continue;
           var pq=pool[pj];
           if(!canTake(ros,pq.pos,round)) continue;
-          if(mustK && pq.pos!=='K') continue;
-          if(mustD && !mustK && pq.pos!=='DEF') continue;
-          if(round>=rounds-2 && ros.QB.length<SIMCFG.starters.QB && pq.pos!=='QB') continue;
+          if(forcePos && pq.pos!==forcePos) continue;
           var vor = ep(pq) - (repl[pq.pos]||0);
           var need;
           if(startersOpen(ros,pq.pos)) need = 1.0;
           else if(SIMCFG.flexPos.indexOf(pq.pos) >= 0) need = 0.45;  // real bench/flex upside
-          else need = 0.08;   // a 2nd QB/K/DEF cannot start: bye-week cover only
+          else if(pq.pos==='QB' && ros.QB.length < SIMCFG.wantQB) need = 0.30;  // bye/injury cover
+          else need = 0.08;   // a 3rd QB or 2nd K/DEF is dead weight
           if(vor < 0) vor = vor * (1/Math.max(need,0.08));  // don't let need-weighting flatter a negative pick
           cands.push({i:pj, v: vor*need});
           if(cands.length>=60) break;   // deep enough; list is ADP-ordered
@@ -1052,7 +1062,7 @@ DATA.forEach(r=>{
 // Scoring changes which ADP set and which projection column we read; team count
 // changes everything we compute ourselves. The ADP feed ignores team size, so a
 // 12-team league sees the same ADP as a 10-team one — only derived numbers move.
-const LG = {teams:10, scoring:'half', qb:1};
+const LG = {teams:10, scoring:'half', qb:1, qb2:true};
 function lgLoad(){
   try{
     const raw=localStorage.getItem('ffdraft2026.league');
@@ -1060,10 +1070,13 @@ function lgLoad(){
       if(+o.teams) LG.teams=+o.teams;
       if(o.scoring) LG.scoring=o.scoring;
       if(+o.qb) LG.qb=+o.qb;
+      if(typeof o.qb2==='boolean') LG.qb2=o.qb2;
     }
   }catch(e){}
 }
 function lgSave(){ try{ localStorage.setItem('ffdraft2026.league', JSON.stringify(LG)); }catch(e){} }
+// how many QBs you intend to roster (not how many you start)
+function wantQB(){ return LG.qb>=2 ? 2 : (LG.qb2 ? 2 : 1); }
 lgLoad();
 
 // superflex drafts have their own ADP market (FFC's 2QB set)
@@ -1326,6 +1339,7 @@ function renderTeam(){
   // bye-week collisions + open needs
   const clashes=Object.keys(byeCount).filter(b=>byeCount[b]>=2);
   let ex='';
+  void 0;
   if(clashes.length){
     ex+='<div class="card alert amber"><h2>Bye-week collisions</h2><ul>';
     clashes.forEach(b=>{
@@ -1335,6 +1349,41 @@ function renderTeam(){
     ex+='</ul><p class="sub" style="margin:8px 0 0">Not a drafting error by itself, but plan a '
       +'waiver add or bench that week.</p></div>';
   }
+  // ---- bye cover for every starter, position by position ----
+  const benchBy={};
+  bench.forEach(p=>{ (benchBy[p.pos]=benchBy[p.pos]||[]).push(p); });
+  const cover=[], gaps=[];
+  rows.filter(r=>r.p).forEach(r=>{
+    const st=r.p, alts=(benchBy[st.pos]||[]).filter(b=>String(b.bye)!==String(st.bye));
+    // a FLEX-eligible starter can also be covered by a bench player at a sibling position
+    let pool2=alts.slice();
+    if(['RB','WR','TE'].indexOf(st.pos)>=0){
+      ['RB','WR','TE'].forEach(q=>{ if(q!==st.pos)
+        pool2=pool2.concat((benchBy[q]||[]).filter(b=>String(b.bye)!==String(st.bye))); });
+    }
+    if(pool2.length) cover.push({s:st,slot:r.slot,by:pool2[0]});
+    else gaps.push({s:st,slot:r.slot});
+  });
+  if(gaps.length){
+    ex+='<div class="card"><h2>Bye-week cover</h2>'
+      +'<p class="sub" style="margin:-4px 0 8px">Who sits on your bench when each starter '
+      +'has their week off. A gap is not a disaster &mdash; it just means a waiver add that week.</p><ul>';
+    gaps.forEach(g=>{
+      ex+='<li><b>'+esc2(g.s.name)+'</b> ('+g.slot+', week '+g.s.bye+' off) &mdash; '
+        +'<span class="up">no bench '+g.s.pos+' to cover</span></li>';
+    });
+    ex+='</ul>';
+    if(cover.length){
+      ex+='<p class="sub" style="margin:8px 0 0">Covered: '
+        + cover.map(c=>esc2(c.s.name)+' &rarr; '+esc2(c.by.name)).join(' &middot; ')+'</p>';
+    }
+    ex+='</div>';
+  } else if(cover.length){
+    ex+='<div class="card"><h2>Bye-week cover</h2><p class="sub" style="margin:0">'
+      +'Every starter has a bench player at their position with a different bye. '
+      + cover.map(c=>esc2(c.s.name)+' &rarr; '+esc2(c.by.name)).join(' &middot; ')+'</p></div>';
+  }
+
   const needs=rows.filter(r=>!r.p).map(r=>r.slot);
   if(needs.length){
     ex+='<div class="card"><h2>Still needed</h2><p class="sub" style="margin:0">'
@@ -1546,18 +1595,22 @@ function applyLeague(){
   document.getElementById('lgTeams').value = LG.teams;
   document.getElementById('lgScoring').value = LG.scoring;
   document.getElementById('lgQB').value = LG.qb;
+  const q2=document.getElementById('lgQB2'), q2w=document.getElementById('lgQB2Wrap');
+  if(q2) q2.checked = LG.qb2;
+  if(q2w) q2w.style.display = (LG.qb>=2 ? 'none' : '');   // superflex already needs two
   rebuildSlotOptions(); lgNote(); lgPill(); lgSave();
   document.getElementById('simOut').innerHTML='';   // stale results for the old format
   render();
   if(sec==='team') renderTeam();
 }
-['lgTeams','lgScoring','lgQB'].forEach(id=>{
+['lgTeams','lgScoring','lgQB','lgQB2'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el) return;
   el.addEventListener('change',()=>{
     if(id==='lgTeams') LG.teams=+el.value;
     if(id==='lgScoring') LG.scoring=el.value;
     if(id==='lgQB') LG.qb=+el.value;
+    if(id==='lgQB2') LG.qb2=el.checked;
     applyLeague();
   });
 });
