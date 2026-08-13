@@ -309,7 +309,7 @@ details.dlog[open]>summary::before{content:"▾ "}
     <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
     <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
     <span class="pill"><b>120</b> players ranked</span>
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 3:18 PM</b></span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 3:19 PM</b></span>
     <span class="pill" id="pillLeague"></span>
   </div>
   <div class="hdrctl">
@@ -535,7 +535,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 </div>
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T15:17:35</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T15:18:33</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -615,7 +615,11 @@ function buildReplacement(pool, useRisk){
   return repl;
 }
 
-function emptyRoster(){ return {QB:[],RB:[],WR:[],TE:[],K:[],DEF:[],all:[]}; }
+function emptyRoster(){ return {QB:[],RB:[],WR:[],TE:[],K:[],DEF:[],all:[],byes:{}}; }
+function addToRoster(ros, p){
+  ros[p.pos].push(p); ros.all.push(p);
+  if(p.pos!=='K' && p.pos!=='DEF') ros.byes[p.bye]=(ros.byes[p.bye]||0)+1;
+}
 
 function canTake(ros, pos, round){
   if(ros[pos].length >= SIMCFG.caps[pos]) return false;
@@ -725,7 +729,7 @@ function runSim(pool, slot, sims, useRisk, seed, state){
       // opponents by snake order so their future behaviour stays plausible
       var owner = hist[h].m ? (slot-1) : teamAt(h+1, teams);
       if(!hist[h].m && owner === slot-1) owner = (slot % teams);   // don't gift me someone else's pick
-      if(rosters[owner][hp.pos].length < 20){ rosters[owner][hp.pos].push(hp); rosters[owner].all.push(hp); }
+      if(rosters[owner][hp.pos].length < 20) addToRoster(rosters[owner], hp);
     }
 
     for(var pick=startPick; pick<=totalPicks; pick++){
@@ -772,6 +776,11 @@ function runSim(pool, slot, sims, useRisk, seed, state){
           if(!canTake(ros,pq.pos,round)) continue;
           if(forcePos && pq.pos!==forcePos) continue;
           var vor = ep(pq) - (repl[pq.pos]||0);
+          // charge for doubling up on a bye week I already have covered thinly
+          if(BYE_COST>0 && pq.pos!=='K' && pq.pos!=='DEF'){
+            var already = ros.byes[pq.bye]||0;
+            if(already>0) vor -= BYE_COST*0.7*already;
+          }
           var need;
           if(startersOpen(ros,pq.pos)) need = 1.0;
           else if(SIMCFG.flexPos.indexOf(pq.pos) >= 0) need = 0.45;  // real bench/flex upside
@@ -795,7 +804,7 @@ function runSim(pool, slot, sims, useRisk, seed, state){
       if(chosen<0) continue;
       taken[chosen]=1;
       var cp=pool[chosen];
-      rosters[t][cp.pos].push(cp); rosters[t].all.push(cp);
+      addToRoster(rosters[t], cp);
       if(isMine) myPicksThisSim.push({pick:pick, p:cp});
     }
 
