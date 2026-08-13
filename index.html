@@ -35,6 +35,29 @@ h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;margin:0 0 8px;font-weig
 ul{margin:8px 0;padding-left:20px}
 li{margin:5px 0}
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+/* section nav */
+.secnav{display:flex;gap:6px;flex-wrap:wrap;margin:22px 0 4px;padding-bottom:0;
+ border-bottom:1px solid var(--line)}
+.snav{flex:0 0 auto;padding:10px 16px 11px;border:1px solid transparent;border-bottom:none;
+ background:none;color:var(--dim);font:inherit;font-size:14.5px;font-weight:650;cursor:pointer;
+ border-radius:10px 10px 0 0;position:relative;top:1px;text-align:left;letter-spacing:-.01em}
+.snav:hover{color:var(--ink)}
+.snav.on{background:var(--card);border-color:var(--line);color:var(--accent)}
+.snav .sn{display:block;font-size:10.5px;font-weight:500;color:var(--dim);
+ letter-spacing:.02em;margin-top:1px;text-transform:none}
+.sec[hidden]{display:none}
+.sec{animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+/* roster view */
+.lineup{width:100%;border-collapse:collapse;margin-top:12px}
+.lineup th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;
+ color:var(--dim);padding:8px 6px;border-bottom:1px solid var(--line);font-weight:700}
+.lineup td{padding:9px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.lineup td.l{font-variant-numeric:normal}
+.lineup tr.bench td{opacity:.6}
+.lineup tr.empty td{color:var(--dim);font-style:italic}
+.slotname{font-size:10.5px;font-weight:800;letter-spacing:.05em;color:var(--dim);width:52px}
+.byeclash{background:var(--warnbg);color:var(--warn);font-weight:700;border-radius:4px;padding:1px 5px;font-size:11px}
 /* draft tracker */
 tr.taken{opacity:.3}
 tr.taken .nm{text-decoration:line-through}
@@ -182,56 +205,22 @@ kbd{background:var(--card);border:1px solid var(--line);border-radius:4px;paddin
     <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
     <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
     <span class="pill"><b>120</b> players ranked</span>
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 2:15 PM</b></span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 2:30 PM</b></span>
   </div>
 </header>
+<nav class="secnav" id="secnav">
+  <button class="snav on" data-sec="board">Board<span class="sn">rankings &amp; live draft</span></button>
+  <button class="snav" data-sec="team">My Team<span class="sn" id="snTeam">nothing drafted</span></button>
+  <button class="snav" data-sec="sim">Simulator<span class="sn">Monte Carlo</span></button>
+  <button class="snav" data-sec="strategy">Strategy<span class="sn">plans by slot</span></button>
+  <button class="snav" data-sec="news">News<span class="sn" id="snNews">alerts &amp; changes</span></button>
+</nav>
 
-<div class="card alert">
-  <h2>Red flags the market hasn't priced in</h2>
-  <ul>
-    <li><b>Alec Pierce (WR, IND) &mdash; ADP 50.3, on PUP after ankle surgery.</b> The single clearest mistake on the public board. Do not draft him anywhere near cost.</li>
-    <li><b>George Kittle (TE, SF)</b> &mdash; PUP, Achilles surgery. ADP 116 is still too high.</li>
-    <li><b>Tucker Kraft (TE, GB)</b> &mdash; ACL surgery. ADP 102 is too high.</li>
-    <li><b>Patrick Mahomes (QB, KC)</b> &mdash; ACL surgery. ADP 99 is a QB2 stash price, not a starter price. It also drags down <b>Rashee Rice</b> and <b>Xavier Worthy</b>.</li>
-    <li><b>Malik Nabers (WR, NYG)</b> &mdash; ACL recovery at ADP 30. Elite talent, genuine risk.</li>
-  </ul>
-</div>
-
-<div class="card alert amber">
-  <h2>Offseason moves worth double-checking before you draft</h2>
-  <p class="sub" style="margin-bottom:10px">Rosters changed a lot. These are the ones most likely to trip you up if you're working from memory:</p>
-  <ul>
-    <li><b>A.J. Brown &rarr; NE</b> &middot; <b>Kenneth Walker &rarr; KC</b> &middot; <b>Jaylen Waddle &rarr; DEN</b> &middot; <b>Mike Evans &rarr; SF</b></li>
-    <li><b>Travis Etienne &rarr; NO</b> &middot; <b>Michael Pittman &rarr; PIT</b> &middot; <b>Jakobi Meyers &rarr; JAX</b> &middot; <b>DJ Moore &rarr; BUF</b></li>
-    <li><b>Stefon Diggs &rarr; WAS</b> &middot; <b>Javonte Williams &rarr; DAL</b> &middot; <b>Wan'Dale Robinson &rarr; TEN</b> &middot; <b>Rashid Shaheed &rarr; SEA</b></li>
-    <li><b>Kyler Murray &rarr; MIN</b> &middot; <b>Tua &rarr; ATL</b> &middot; <b>Isiah Pacheco &rarr; DET</b> &middot; <b>Cooper Kupp &rarr; SEA</b></li>
-    <li><b>Tyreek Hill is a free agent</b> (no team, age 31, post-ACL) &mdash; he is not on this board.</li>
-    <li><b>Travis Kelce did not retire</b> &mdash; still KC, ADP 128, and a fine late flier.</li>
-  </ul>
-</div>
-
-<div class="card chg">
-  <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T14:12:43</p>
-  <div class="grid">
-    <div>
-      <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
-      <h3>Injuries cleared</h3><p class="none">None cleared.</p>
-      <h3>Injury status changed</h3><p class="none">No status changes.</p>
-    </div>
-    <div>
-      <h3>ADP movers (&ge;5 picks)</h3><p class="none">No meaningful ADP movement.</p>
-      <h3>Projection movers (&ge;8 pts)</h3><p class="none">No projection changes.</p>
-      <h3>New to the market's top 120</h3><p class="none">Nobody new.</p>
-    </div>
-  </div>
-</div>
-
+<section class="sec" id="sec-board">
 <div class="tabwrap">
   <div class="tabs" id="tabs"></div>
   <div class="brief" id="brief"></div>
 </div>
-
 <div class="controls">
   <input type="search" id="q" placeholder="Search player or team…" autocomplete="off">
   <button class="btn on" data-pos="ALL">All</button>
@@ -244,7 +233,6 @@ kbd{background:var(--card);border:1px solid var(--line);border-radius:4px;paddin
   <button class="btn" id="reset">Reset</button>
   <span class="count" id="count"></span>
 </div>
-
 <div class="trk">
   <span class="lead" id="trkState">Draft not started</span>
   <button class="btn" id="mkThem">Mark taken</button>
@@ -256,8 +244,36 @@ kbd{background:var(--card);border:1px solid var(--line);border-radius:4px;paddin
 Fastest during a live draft: type a few letters in the search box and press <kbd>Enter</kbd>
 for taken, <kbd>Shift</kbd>+<kbd>Enter</kbd> for your own pick. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes
 the last mark. Everything saves to this browser automatically.</p>
+<table id="tbl">
+<thead><tr>
+  <th class="ck" title="Drafted by someone else">Taken</th>
+  <th class="ck" title="Drafted by me">Mine</th>
+  <th class="s" data-k="rank">#</th>
+  <th class="s" data-k="name">Player</th>
+  <th>Pos</th>
+  <th>Tm</th>
+  <th class="s" data-k="adp">ADP</th>
+  <th class="s" data-k="rtg">Rtg</th>
+  <th class="s" data-k="delta">&Delta;</th>
+  <th class="s" data-k="bye">Bye</th>
+  <th>Read</th>
+</tr></thead>
+<tbody id="tb"></tbody>
+</table>
+</section>
 
-<div id="simpanel" style="display:none">
+<section class="sec" id="sec-team" hidden>
+  <div class="card">
+    <h2>Your roster</h2>
+    <p class="sub" style="margin:-4px 0 0">Built from every player you tick as <b>Mine</b> on the
+    Board. Projections are half-PPR season totals, adjusted for injury risk.</p>
+    <div id="teamBody"></div>
+  </div>
+  <div id="teamExtra"></div>
+</section>
+
+<section class="sec" id="sec-sim" hidden>
+<div id="simpanel">
   <div class="card sim">
     <h2>Monte Carlo draft simulator</h2>
     <p class="sub">Simulates the full 15-round draft thousands of times. Your nine opponents pick
@@ -287,24 +303,9 @@ the last mark. Everything saves to this browser automatically.</p>
   </div>
   <div id="simOut"></div>
 </div>
+</section>
 
-<table id="tbl">
-<thead><tr>
-  <th class="ck" title="Drafted by someone else">Taken</th>
-  <th class="ck" title="Drafted by me">Mine</th>
-  <th class="s" data-k="rank">#</th>
-  <th class="s" data-k="name">Player</th>
-  <th>Pos</th>
-  <th>Tm</th>
-  <th class="s" data-k="adp">ADP</th>
-  <th class="s" data-k="rtg">Rtg</th>
-  <th class="s" data-k="delta">&Delta;</th>
-  <th class="s" data-k="bye">Bye</th>
-  <th>Read</th>
-</tr></thead>
-<tbody id="tb"></tbody>
-</table>
-
+<section class="sec" id="sec-strategy" hidden>
 <div class="two">
 <div class="card">
   <h2>The biggest edge: wait on QB</h2>
@@ -323,7 +324,6 @@ the last mark. Everything saves to this browser automatically.</p>
   <p>Achane or London should fall to you. Use the back-to-back picks to <b>double-tap RB</b> at the 2/3 turn (Chase Brown, Hampton, Love, Walker), then flood WR in Rounds 4&ndash;6 where <b>Higgins, Irving, and Brian Thomas Jr.</b> are all discounted.</p>
 </div>
 </div>
-
 <div class="card">
   <h2>Rounds 13&ndash;15: kicker, defense, fliers</h2>
   <div class="two">
@@ -339,6 +339,48 @@ the last mark. Everything saves to this browser automatically.</p>
   <h3>What to do with the true last picks</h3>
   <p>Two RB handcuffs to workhorse backs (<b>Jordan Mason</b>, <b>Blake Corum</b>, <b>Kyle Monangai</b>), one WR attached to a high-volume passing game, and <b>Travis Kelce at 128</b> as a free-roll TE2. Everything else at this depth belongs on the Week 2 waiver wire.</p>
 </div>
+</section>
+
+<section class="sec" id="sec-news" hidden>
+<div class="card alert">
+  <h2>Red flags the market hasn't priced in</h2>
+  <ul>
+    <li><b>Alec Pierce (WR, IND) &mdash; ADP 50.3, on PUP after ankle surgery.</b> The single clearest mistake on the public board. Do not draft him anywhere near cost.</li>
+    <li><b>George Kittle (TE, SF)</b> &mdash; PUP, Achilles surgery. ADP 116 is still too high.</li>
+    <li><b>Tucker Kraft (TE, GB)</b> &mdash; ACL surgery. ADP 102 is too high.</li>
+    <li><b>Patrick Mahomes (QB, KC)</b> &mdash; ACL surgery. ADP 99 is a QB2 stash price, not a starter price. It also drags down <b>Rashee Rice</b> and <b>Xavier Worthy</b>.</li>
+    <li><b>Malik Nabers (WR, NYG)</b> &mdash; ACL recovery at ADP 30. Elite talent, genuine risk.</li>
+  </ul>
+</div>
+<div class="card alert amber">
+  <h2>Offseason moves worth double-checking before you draft</h2>
+  <p class="sub" style="margin-bottom:10px">Rosters changed a lot. These are the ones most likely to trip you up if you're working from memory:</p>
+  <ul>
+    <li><b>A.J. Brown &rarr; NE</b> &middot; <b>Kenneth Walker &rarr; KC</b> &middot; <b>Jaylen Waddle &rarr; DEN</b> &middot; <b>Mike Evans &rarr; SF</b></li>
+    <li><b>Travis Etienne &rarr; NO</b> &middot; <b>Michael Pittman &rarr; PIT</b> &middot; <b>Jakobi Meyers &rarr; JAX</b> &middot; <b>DJ Moore &rarr; BUF</b></li>
+    <li><b>Stefon Diggs &rarr; WAS</b> &middot; <b>Javonte Williams &rarr; DAL</b> &middot; <b>Wan'Dale Robinson &rarr; TEN</b> &middot; <b>Rashid Shaheed &rarr; SEA</b></li>
+    <li><b>Kyler Murray &rarr; MIN</b> &middot; <b>Tua &rarr; ATL</b> &middot; <b>Isiah Pacheco &rarr; DET</b> &middot; <b>Cooper Kupp &rarr; SEA</b></li>
+    <li><b>Tyreek Hill is a free agent</b> (no team, age 31, post-ACL) &mdash; he is not on this board.</li>
+    <li><b>Travis Kelce did not retire</b> &mdash; still KC, ADP 128, and a fine late flier.</li>
+  </ul>
+</div>
+<div class="card chg">
+  <h2>Changed since last refresh</h2>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T14:15:06</p>
+  <div class="grid">
+    <div>
+      <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
+      <h3>Injuries cleared</h3><p class="none">None cleared.</p>
+      <h3>Injury status changed</h3><p class="none">No status changes.</p>
+    </div>
+    <div>
+      <h3>ADP movers (&ge;5 picks)</h3><p class="none">No meaningful ADP movement.</p>
+      <h3>Projection movers (&ge;8 pts)</h3><p class="none">No projection changes.</p>
+      <h3>New to the market's top 120</h3><p class="none">Nobody new.</p>
+    </div>
+  </div>
+</div>
+</section>
 
 <footer>
   <p><b>How to use this page.</b> Use the <b>round tabs</b> to see only the players who should be on the table at that pick, with a strategy brief for each round. Click any row to mark a player drafted &mdash; it persists in this browser. Sort by any underlined column. <b>&Delta;</b> is market ADP minus my rank: <span style="color:var(--value);font-weight:600">positive means the player is falling to you</span>, negative means the market is paying up. Tabs, filters, and search all stack together.</p>
@@ -807,6 +849,22 @@ const tabs=document.getElementById('tabs'), brief=document.getElementById('brief
 
 const roundOf = r => Math.min(12, Math.ceil(r.rank/10));
 
+// ---------- top-level sections ----------
+const SECS=['board','team','sim','strategy','news'];
+let sec='board';
+function showSection(name){
+  if(SECS.indexOf(name)<0) name='board';
+  sec=name;
+  SECS.forEach(x=>{
+    const el=document.getElementById('sec-'+x);
+    if(el) el.hidden = (x!==name);
+  });
+  document.querySelectorAll('.snav').forEach(b=>b.classList.toggle('on',b.dataset.sec===name));
+  try{ localStorage.setItem('ffdraft2026.sec', name); }catch(e){}
+  if(name==='team') renderTeam();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 function buildTabs(){
   let h='<button class="tab on" data-r="ALL">All<span class="tn">120 players</span></button>';
   for(let i=1;i<=12;i++){
@@ -814,17 +872,11 @@ function buildTabs(){
     const lbl = i===12 ? 'R12+' : 'R'+i;
     h+='<button class="tab" data-r="'+i+'">'+lbl+'<span class="tn">'+n+' players</span></button>';
   }
-  h+='<button class="tab" data-r="SIM">Simulator<span class="tn">Monte Carlo</span></button>';
   tabs.innerHTML=h;
   tabs.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
-    rnd = (b.dataset.r==='ALL'||b.dataset.r==='SIM') ? b.dataset.r : +b.dataset.r;
+    rnd = b.dataset.r==='ALL' ? 'ALL' : +b.dataset.r;
     tabs.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
-    const isSim = (rnd==='SIM');
-    document.getElementById('simpanel').style.display = isSim ? '' : 'none';
-    document.querySelector('.controls').style.display = isSim ? 'none' : '';
-    document.getElementById('tbl').style.display     = isSim ? 'none' : '';
-    brief.style.display = isSim ? 'none' : '';
-    if(!isSim){ setBrief(); render(); }
+    setBrief(); render();
   }));
 }
 function setBrief(){
@@ -864,6 +916,101 @@ function markPlayer(name, isMine){                      // toggle (keyboard + bu
 }
 function undoMark(){ if(history.length){ history.pop(); save(); render(); } }
 
+function renderTeam(){
+  const body=document.getElementById('teamBody');
+  const extra=document.getElementById('teamExtra');
+  if(!body) return;
+  const mine=mineList.map(n=>POOLBY[n]).filter(Boolean);
+  if(!mine.length){
+    body.innerHTML='<p class="none" style="margin:14px 0 0">Nothing drafted yet. '
+      +'Tick <b>Mine</b> on the Board as you make picks and your roster builds here.</p>';
+    extra.innerHTML='';
+    return;
+  }
+  const ep=p=>p.proj*p.rm;
+  const pool={QB:[],RB:[],WR:[],TE:[],K:[],DEF:[]};
+  mine.forEach(p=>{ if(pool[p.pos]) pool[p.pos].push(p); });
+  Object.keys(pool).forEach(k=>pool[k].sort((a,b)=>ep(b)-ep(a)));
+
+  // fill the starting lineup exactly like the simulator scores it
+  const used={}, rows=[];
+  let total=0;
+  function fill(slot,pos,n){
+    for(let i=0;i<n;i++){
+      const p=(pool[pos]||[]).filter(x=>!used[x.name])[0];
+      if(p){ used[p.name]=1; total+=ep(p); rows.push({slot:slot,p:p}); }
+      else rows.push({slot:slot,p:null});
+    }
+  }
+  fill('QB','QB',1); fill('RB','RB',2); fill('WR','WR',3); fill('TE','TE',1);
+  const flexCand=['RB','WR','TE'].flatMap(k=>pool[k]).filter(x=>!used[x.name]).sort((a,b)=>ep(b)-ep(a));
+  if(flexCand.length){ used[flexCand[0].name]=1; total+=ep(flexCand[0]); rows.push({slot:'FLEX',p:flexCand[0]}); }
+  else rows.push({slot:'FLEX',p:null});
+  fill('K','K',1); fill('DEF','DEF',1);
+  const bench=mine.filter(p=>!used[p.name]).sort((a,b)=>ep(b)-ep(a));
+
+  let h='<table class="lineup"><thead><tr><th>Slot</th><th>Player</th><th>Pos</th><th>Tm</th>'
+      + '<th>Bye</th><th>Proj</th><th>Rtg</th></tr></thead><tbody>';
+  const byeCount={};
+  rows.forEach(r=>{ if(r.p) byeCount[r.p.bye]=(byeCount[r.p.bye]||0)+1; });
+  rows.forEach(r=>{
+    if(!r.p){
+      h+='<tr class="empty"><td class="slotname">'+r.slot+'</td>'
+        +'<td class="l" colspan="6">empty &mdash; still need a '+r.slot+'</td></tr>';
+      return;
+    }
+    const p=r.p, clash=byeCount[p.bye]>=2;
+    h+='<tr><td class="slotname">'+r.slot+'</td>'
+      +'<td class="l"><b>'+esc2(p.name)+'</b></td>'
+      +'<td class="l"><span class="pos '+p.pos+'">'+p.pos+'</span></td>'
+      +'<td class="l tm">'+esc2(p.team)+'</td>'
+      +'<td>'+(clash?'<span class="byeclash">'+p.bye+'</span>':p.bye)+'</td>'
+      +'<td>'+simFmt(ep(p))+'</td>'
+      +'<td>'+(p.rtg!==null?p.rtg:'&mdash;')+'</td></tr>';
+  });
+  if(bench.length){
+    h+='<tr><td colspan="7" class="rowband">Bench</td></tr>';
+    bench.forEach(p=>{
+      h+='<tr class="bench"><td class="slotname">BN</td>'
+        +'<td class="l"><b>'+esc2(p.name)+'</b></td>'
+        +'<td class="l"><span class="pos '+p.pos+'">'+p.pos+'</span></td>'
+        +'<td class="l tm">'+esc2(p.team)+'</td><td>'+p.bye+'</td>'
+        +'<td>'+simFmt(ep(p))+'</td>'
+        +'<td>'+(p.rtg!==null?p.rtg:'&mdash;')+'</td></tr>';
+    });
+  }
+  h+='</tbody></table>';
+
+  const filled=rows.filter(r=>r.p).length, slots=rows.length;
+  h='<div class="tiles" style="margin-top:14px">'
+    +'<div class="tile"><div class="tl">Starters</div><div class="tv">'+filled+'/'+slots+'</div></div>'
+    +'<div class="tile hi"><div class="tl">Projected pts</div><div class="tv">'+simInt(total)+'</div></div>'
+    +'<div class="tile"><div class="tl">Drafted</div><div class="tv">'+mine.length+'</div></div>'
+    +'<div class="tile"><div class="tl">Picks left</div><div class="tv">'+Math.max(0,15-mine.length)+'</div></div>'
+    +'</div>' + h;
+  body.innerHTML=h;
+
+  // bye-week collisions + open needs
+  const clashes=Object.keys(byeCount).filter(b=>byeCount[b]>=2);
+  let ex='';
+  if(clashes.length){
+    ex+='<div class="card alert amber"><h2>Bye-week collisions</h2><ul>';
+    clashes.forEach(b=>{
+      const who=rows.filter(r=>r.p&&String(r.p.bye)===String(b)).map(r=>r.p.name+' ('+r.slot+')');
+      ex+='<li><b>Week '+b+'</b> &mdash; '+who.length+' starters out: '+who.map(esc2).join(', ')+'</li>';
+    });
+    ex+='</ul><p class="sub" style="margin:8px 0 0">Not a drafting error by itself, but plan a '
+      +'waiver add or bench that week.</p></div>';
+  }
+  const needs=rows.filter(r=>!r.p).map(r=>r.slot);
+  if(needs.length){
+    ex+='<div class="card"><h2>Still needed</h2><p class="sub" style="margin:0">'
+      +'<b>'+needs.join(', ')+'</b> &mdash; run the Simulator to see who is likely to be there '
+      +'at your remaining picks.</p></div>';
+  }
+  extra.innerHTML=ex;
+}
+
 function renderTracker(){
   const made = history.length, next = made+1;
   const picks = myPickList();
@@ -893,6 +1040,8 @@ function renderTracker(){
   h += '<span class="rslot '+(flexUsed>=1?'full':'need')+'">FLEX '+Math.min(flexUsed,1)+'/1</span>';
   h += '<span class="rslot">'+mineList.length+' drafted &middot; '+(15-mineList.length)+' left</span>';
   document.getElementById('trkRoster').innerHTML=h;
+  renderNavBadges();
+  if(sec==='team') renderTeam();
 }
 
 function visible(){
@@ -1019,7 +1168,32 @@ document.getElementById('reset').addEventListener('click',()=>{
   setBrief(); render();
 });
 q.addEventListener('input',render);
+
+document.querySelectorAll('.snav').forEach(b=>
+  b.addEventListener('click',()=>showSection(b.dataset.sec)));
+
+// keep the nav subtitles live
+function newsCount(){
+  const card=document.querySelector('#sec-news .card.chg');
+  if(!card) return 0;
+  return card.querySelectorAll('li').length;
+}
+function renderNavBadges(){
+  const t=document.getElementById('snTeam');
+  if(t) t.textContent = mineList.length
+    ? mineList.length+' drafted · '+Math.max(0,15-mineList.length)+' to go'
+    : 'nothing drafted';
+  const n=document.getElementById('snNews');
+  if(n){
+    const c=newsCount();
+    n.textContent = c ? c+' change'+(c===1?'':'s')+' this refresh' : 'alerts & changes';
+  }
+}
+
 buildTabs(); setBrief(); render();
+let boot='board';
+try{ boot = localStorage.getItem('ffdraft2026.sec') || 'board'; }catch(e){}
+showSection(boot);
 </script>
 </body>
 </html>
