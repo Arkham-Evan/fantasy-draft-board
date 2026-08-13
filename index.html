@@ -529,7 +529,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T16:14:13</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T16:17:07</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -1346,7 +1346,8 @@ function renderBest(){
       +'<span class="lbl">'+lbl+'</span>'
       +'<span class="pos '+r.pos+'">'+r.pos+'</span>'
       +'<span class="cn">'+esc2(r.name)+'</span>'
-      +'<span class="meta">'+(note||('Rtg '+r.rtg+' · ADP '+adpOf(r).toFixed(0)))+'</span>'
+      +'<span class="meta">'+(note||('Rtg '+r.rtg+' · ADP '+adpOf(r).toFixed(0)))
+        +(p&&p.dis>=DISAGREE?' · <span class="up">sources split</span>':'')+'</span>'
       +'<span class="cm"><button class="mine" data-act="mine" title="I drafted him">Mine</button>'
       +'<button class="taken" data-act="taken" title="Someone else took him">Taken</button></span>'
       +'</div>';
@@ -1478,6 +1479,14 @@ function renderTeam(){
     });
   }
   h+='</tbody></table>';
+  const split=mine.filter(p=>p.dis>=DISAGREE);
+  if(split.length){
+    h+='<p class="sub" style="margin:10px 0 0;font-size:12.5px">⚠ The two projection sources '
+      +'disagree by 15%+ on '
+      + split.map(p=>'<b>'+esc2(p.name)+'</b> (Sleeper '+simFmt(projSleeper(p))
+        +' vs ESPN '+simFmt(projEspn(p))+')').join(', ')
+      + ' &mdash; the number shown is the average, so treat those as less certain.</p>';
+  }
 
   const filled=rows.filter(r=>r.p).length, slots=rows.length;
   h='<div class="tiles" style="margin-top:14px">'
