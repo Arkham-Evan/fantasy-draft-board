@@ -314,7 +314,7 @@ details.dlog[open]>summary::before{content:"▾ "}
   <h1>2026 Fantasy Draft Board</h1>
   <p class="sub">Set your league format below &mdash; ADP, projections and the simulator all follow it.</p>
   <div class="pills">
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 4:17 PM</b> &middot; updates hourly</span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 4:19 PM</b> &middot; updates hourly</span>
     <span class="pill" id="pillLeague"></span>
   </div>
   <p class="srcline">
@@ -363,6 +363,13 @@ details.dlog[open]>summary::before{content:"▾ "}
       <select id="lgQB">
         <option value="1" selected>1 QB</option>
         <option value="2">Superflex / 2 QB</option>
+      </select>
+    </label>
+    <label>Projections
+      <select id="lgPsrc">
+        <option value="cons" selected>Consensus (both)</option>
+        <option value="sleeper">Sleeper only</option>
+        <option value="espn">ESPN only</option>
       </select>
     </label>
     <label class="chk" id="lgQB2Wrap"><input type="checkbox" id="lgQB2" checked>
@@ -529,7 +536,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T16:17:07</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T16:17:36</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -1191,7 +1198,7 @@ DATA.forEach(r=>{
 // Scoring changes which ADP set and which projection column we read; team count
 // changes everything we compute ourselves. The ADP feed ignores team size, so a
 // 12-team league sees the same ADP as a 10-team one — only derived numbers move.
-const LG = {teams:10, scoring:'half', qb:1, qb2:true};
+const LG = {teams:10, scoring:'half', qb:1, qb2:true, psrc:'cons'};
 function lgLoad(){
   try{
     const raw=localStorage.getItem('ffdraft2026.league');
@@ -1200,6 +1207,7 @@ function lgLoad(){
       if(o.scoring) LG.scoring=o.scoring;
       if(+o.qb) LG.qb=+o.qb;
       if(typeof o.qb2==='boolean') LG.qb2=o.qb2;
+      if(o.psrc) LG.psrc=o.psrc;
     }
   }catch(e){}
 }
@@ -1216,7 +1224,18 @@ function adpOf(o){
   return (a[k]!==undefined?a[k] : (a.half!==undefined?a.half : (a.ppr!==undefined?a.ppr : (a.std!==undefined?a.std : 999))));
 }
 function sdOf(o){ const d=o.sd||{}, k=adpKey(); return d[k]!==undefined?d[k]:(d.half||0); }
-function projOf(p){ const q=p.proj||{}; const v=q[projKey()]; return (v!==undefined?v:q.half)||0; }
+const DISAGREE = 0.15;   // 15%+ apart counts as the sources genuinely differing
+// which projection source to believe: 'cons' (average), 'sleeper', or 'espn'
+function projSrc(){ return LG.psrc || 'cons'; }
+function projSleeper(p){ const q=p.proj||{}; const v=q[projKey()]; return (v!==undefined?v:q.half)||0; }
+function projEspn(p){ if(!p.e) return null; const v=p.e[projKey()]; return v!==undefined?v:p.e.half; }
+function projOf(p){
+  const src=projSrc();
+  if(src==='sleeper') return projSleeper(p);
+  if(src==='espn'){ const v=projEspn(p); if(v!==null && v!==undefined) return v; return projSleeper(p); }
+  const q=p.c||p.proj||{}; const v=q[projKey()];
+  return (v!==undefined?v:q.half)||0;
+}
 function deltaOf(r){ return Math.round((adpOf(r)-r.rank)*10)/10; }
 function adpRound(adp){
   const t=LG.teams, rd=Math.max(1,Math.ceil(adp/t)), pk=Math.round(adp-(rd-1)*t);
@@ -1756,6 +1775,8 @@ function applyLeague(){
   document.getElementById('lgTeams').value = LG.teams;
   document.getElementById('lgScoring').value = LG.scoring;
   document.getElementById('lgQB').value = LG.qb;
+  const ps=document.getElementById('lgPsrc');
+  if(ps) ps.value = LG.psrc;
   const q2=document.getElementById('lgQB2'), q2w=document.getElementById('lgQB2Wrap');
   if(q2) q2.checked = LG.qb2;
   if(q2w) q2w.style.display = (LG.qb>=2 ? 'none' : '');   // superflex already needs two
@@ -1764,7 +1785,7 @@ function applyLeague(){
   render();
   if(sec==='team') renderTeam();
 }
-['lgTeams','lgScoring','lgQB','lgQB2'].forEach(id=>{
+['lgTeams','lgScoring','lgQB','lgQB2','lgPsrc'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el) return;
   el.addEventListener('change',()=>{
@@ -1772,6 +1793,7 @@ function applyLeague(){
     if(id==='lgScoring') LG.scoring=el.value;
     if(id==='lgQB') LG.qb=+el.value;
     if(id==='lgQB2') LG.qb2=el.checked;
+    if(id==='lgPsrc') LG.psrc=el.value;
     applyLeague();
   });
 });
