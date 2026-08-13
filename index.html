@@ -309,7 +309,7 @@ details.dlog[open]>summary::before{content:"▾ "}
     <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
     <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
     <span class="pill"><b>120</b> players ranked</span>
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 3:17 PM</b></span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 3:18 PM</b></span>
     <span class="pill" id="pillLeague"></span>
   </div>
   <div class="hdrctl">
@@ -535,7 +535,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 </div>
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T15:08:35</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T15:17:35</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -807,7 +807,7 @@ function runSim(pool, slot, sims, useRisk, seed, state){
       var key=mp.p.name; planCounts[i][key]=(planCounts[i][key]||0)+1;
     });
     if(!best || res.total>best.total){
-      best={ total:res.total, lineup:res.lineup,
+      best={ total:res.total, raw:res.raw, clash:res.clash, lineup:res.lineup,
              picks: myPicksThisSim.map(function(x){return {pick:x.pick,name:x.p.name,pos:x.p.pos,
                team:x.p.team,proj:projOf(x.p),rm:x.p.rm,adp:adpOf(x.p)};}),
              sim:s };
