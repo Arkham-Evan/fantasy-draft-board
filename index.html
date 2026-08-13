@@ -309,7 +309,7 @@ details.dlog[open]>summary::before{content:"▾ "}
     <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
     <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
     <span class="pill"><b>120</b> players ranked</span>
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 2:34 PM</b></span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 2:36 PM</b></span>
   </div>
   <div class="hdrctl">
     <button class="btn" id="btnTheme" title="Cycle appearance: auto, light, dark">Auto</button>
@@ -497,7 +497,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 </div>
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T14:30:28</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T14:34:52</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -982,11 +982,14 @@ const roundOf = r => Math.min(12, Math.ceil(r.rank/10));
 
 // ---------- talent tiers from rating gaps, not arbitrary 10-player slices ----------
 const TIER_WIDTH = 4;      // a new tier starts once Rtg has fallen this far from its top
+const TIER_MAX   = 10;     // ...or once it gets too big to be a useful grouping
 (function buildTiers(){
-  let tier=0, top=null;
+  // Ratings compress badly at the bottom of the board (dozens of players inside a
+  // few points), so a pure gap rule produces one enormous tail tier. Cap the size.
+  let tier=0, top=null, n=0;
   DATA.slice().sort((a,b)=>a.rank-b.rank).forEach(r=>{
-    if(top===null || (top - r.rtg) >= TIER_WIDTH){ tier++; top=r.rtg; }
-    r.tier=tier;
+    if(top===null || (top - r.rtg) >= TIER_WIDTH || n >= TIER_MAX){ tier++; top=r.rtg; n=0; }
+    r.tier=tier; n++;
   });
 })();
 const TIERS={};
