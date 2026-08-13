@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 Fantasy Draft Board — Half PPR, 10-Team</title>
+<style>
+:root{
+  --bg:#f5f5f7; --card:#fff; --ink:#1d1d1f; --dim:#6e6e73; --line:#d2d2d7;
+  --accent:#0071e3; --value:#1a7f37; --valuebg:#e8f5ec; --fade:#b3261e; --fadebg:#fdeceb;
+  --warn:#9a6700; --warnbg:#fff8e1; --qb:#7b4dff; --rb:#00875a; --wr:#0071e3; --te:#c2410c;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#000; --card:#1c1c1e; --ink:#f5f5f7; --dim:#98989d; --line:#38383a;
+  --accent:#0a84ff; --value:#4ade80; --valuebg:#0f2e1a; --fade:#ff6961; --fadebg:#33100e;
+  --warn:#ffd60a; --warnbg:#332b00;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+ -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 80px}
+header{margin-bottom:24px}
+h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;margin:0 0 8px;font-weight:700}
+.sub{color:var(--dim);font-size:15px;margin:0 0 4px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:100px;
+ padding:5px 13px;font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.pill b{color:var(--ink);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+.card h2{font-size:19px;margin:0 0 12px;letter-spacing:-.01em;font-weight:650}
+.card h3{font-size:15px;margin:18px 0 6px;font-weight:650}
+.alert{border-left:3px solid var(--fade)}
+.alert.amber{border-left-color:var(--warn)}
+ul{margin:8px 0;padding-left:20px}
+li{margin:5px 0}
+.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+/* draft tracker */
+tr.taken{opacity:.3}
+tr.taken .nm{text-decoration:line-through}
+tr.mine{background:color-mix(in srgb,var(--value) 13%,transparent)!important}
+tr.mine .nm{font-weight:750}
+td.mk{width:34px;text-align:center;padding:8px 4px}
+td.mk input{width:16px;height:16px;margin:0;cursor:pointer;vertical-align:middle}
+td.mk input.ckT{accent-color:var(--fade)}
+td.mk input.ckM{accent-color:var(--value)}
+th.ck{width:34px;text-align:center;font-size:9.5px;letter-spacing:.03em;padding:11px 4px}
+.trk{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);
+ border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin:10px 0 0}
+.trk .lead{font-size:12.5px;color:var(--dim)}
+.trk .onclock{font-weight:700;color:var(--value)}
+.trk .soon{font-weight:700;color:var(--warn)}
+.rost{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto}
+.rslot{font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px;
+ background:var(--bg);border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.rslot.full{background:var(--valuebg);color:var(--value);border-color:transparent}
+.rslot.need{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.hint{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.5}
+.hint kbd{margin:0 1px}
+.sim label{display:flex;flex-direction:column;gap:4px;font-size:11px;text-transform:uppercase;
+ letter-spacing:.06em;color:var(--dim);font-weight:600}
+.sim select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);
+ color:var(--ink);font:inherit;font-size:14px;text-transform:none;letter-spacing:0}
+.simctl{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-top:14px}
+.simctl .chk{flex-direction:row;align-items:center;gap:7px;text-transform:none;letter-spacing:0;
+ font-size:13px;font-weight:500;color:var(--ink)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;padding:10px 20px}
+.btn.primary:disabled{opacity:.5;cursor:default}
+#simStatus{font-size:13px;color:var(--dim);align-self:center}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin:4px 0 2px}
+.tile{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.tile .tl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:700}
+.tile .tv{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
+.tile.hi .tv{color:var(--value)}
+table.mini{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+table.mini th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;
+ color:var(--dim);padding:7px 6px;border-bottom:1px solid var(--line);font-weight:700}
+table.mini td{padding:7px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.mini td.l{font-variant-numeric:normal}
+tr.slot td{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.opt{display:inline-block;margin-right:9px;white-space:nowrap}
+.opt b{font-weight:650}
+.opt .pc{color:var(--dim);font-size:11.5px}
+.pbar{display:inline-block;width:42px;height:7px;border-radius:4px;background:var(--line);
+ overflow:hidden;vertical-align:middle;margin-right:6px}
+.pbar i{display:block;height:100%;background:var(--accent)}
+.hist{display:flex;align-items:flex-end;gap:2px;height:58px;margin-top:10px}
+.hist i{flex:1;background:var(--accent);opacity:.5;border-radius:2px 2px 0 0;min-height:1px}
+.hist i.me{opacity:1}
+.chg{border-left:3px solid var(--accent)}
+.chg .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.chg .grid{grid-template-columns:1fr}}
+.chg h3{margin:0 0 6px}
+.chg ul{margin:4px 0 0;padding-left:18px}
+.chg li{font-size:13px;margin:3px 0}
+.chg .none{color:var(--dim);font-size:13px;font-style:italic}
+.up{color:var(--fade);font-weight:650}
+.down{color:var(--value);font-weight:650}
+/* round tabs */
+.tabwrap{padding:10px 0 0}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+ border-bottom:1px solid var(--line);padding-bottom:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:9px 15px;border:1px solid transparent;border-bottom:none;
+ background:none;color:var(--dim);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
+ border-radius:9px 9px 0 0;white-space:nowrap;position:relative;top:1px}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--card);border-color:var(--line);color:var(--accent)}
+.tab .tn{display:block;font-size:10px;font-weight:500;color:var(--dim);letter-spacing:.02em}
+.tab.on .tn{color:var(--dim)}
+.brief{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;
+ padding:13px 18px;font-size:13.5px;color:var(--ink);line-height:1.55}
+.brief b{font-weight:650}
+.brief .bl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);
+ font-weight:700;display:block;margin-bottom:3px}
+/* controls */
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;
+ background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:0}
+input[type=search]{flex:1;min-width:180px;padding:9px 13px;border-radius:9px;border:1px solid var(--line);
+ background:var(--card);color:var(--ink);font-size:14px;font-family:inherit}
+input[type=search]:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.btn{padding:8px 13px;border-radius:9px;border:1px solid var(--line);background:var(--card);
+ color:var(--ink);font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.count{color:var(--dim);font-size:13px;margin-left:auto;font-variant-numeric:tabular-nums}
+/* table */
+table{width:100%;border-collapse:collapse;margin-top:0}
+thead th{position:sticky;top:57px;background:var(--bg);z-index:10;text-align:left;
+ font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);
+ padding:11px 8px;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap}
+thead th.s{cursor:pointer;user-select:none}
+thead th.s:hover{color:var(--accent)}
+tbody td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+tr.drafted{opacity:.32}
+tr.drafted .nm{text-decoration:line-through}
+tr.band{background:color-mix(in srgb,var(--accent) 4%,transparent)}
+td.rk{font-weight:700;color:var(--dim);width:38px;font-variant-numeric:tabular-nums}
+.nm{font-weight:600;letter-spacing:-.01em}
+.pos{display:inline-block;width:30px;text-align:center;border-radius:5px;padding:2px 0;
+ font-size:11px;font-weight:700;color:#fff;letter-spacing:.02em}
+.pos.QB{background:var(--qb)} .pos.RB{background:var(--rb)}
+.pos.WR{background:var(--wr)} .pos.TE{background:var(--te)}
+.tm{color:var(--dim);font-size:12.5px}
+.rtg{font-weight:700;font-variant-numeric:tabular-nums}
+.adp{font-variant-numeric:tabular-nums}
+.adp small{color:var(--dim);display:block;font-size:11px}
+.dl{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+.dl.pos-d{color:var(--value)} .dl.neg-d{color:var(--fade)}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;
+ padding:2px 6px;border-radius:4px;text-transform:uppercase;margin-right:6px;white-space:nowrap}
+.tag.value{background:var(--valuebg);color:var(--value)}
+.tag.fade{background:var(--fadebg);color:var(--fade)}
+.tag.hardfade{background:var(--fade);color:#fff}
+.note{font-size:12.5px;color:var(--dim);max-width:420px}
+.inj{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:4px;
+ background:var(--warnbg);color:var(--warn);margin-top:3px;white-space:nowrap}
+.inj.bad{background:var(--fadebg);color:var(--fade)}
+.rowband{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;
+ padding:14px 8px 6px;background:var(--bg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.two{grid-template-columns:1fr} .note{display:none} }
+footer{color:var(--dim);font-size:12.5px;margin-top:34px;line-height:1.6}
+kbd{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:11px}
+@media print{
+  body{background:#fff} .controls,.tabwrap{display:none} thead th{position:static}
+  .card{break-inside:avoid} tr.drafted{display:none} .wrap{padding:0;max-width:none}
+  a{text-decoration:none;color:inherit}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>2026 Fantasy Draft Board</h1>
+  <p class="sub">Half PPR &middot; 10-team &middot; 1 QB &middot; 15 rounds</p>
+  <div class="pills">
+    <span class="pill">Market data <b>Fantasy Football Calculator</b></span>
+    <span class="pill"><b>2,214</b> drafts sampled</span>
+    <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
+    <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
+    <span class="pill"><b>120</b> players ranked</span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 2:15 PM</b></span>
+  </div>
+</header>
+
+<div class="card alert">
+  <h2>Red flags the market hasn't priced in</h2>
+  <ul>
+    <li><b>Alec Pierce (WR, IND) &mdash; ADP 50.3, on PUP after ankle surgery.</b> The single clearest mistake on the public board. Do not draft him anywhere near cost.</li>
+    <li><b>George Kittle (TE, SF)</b> &mdash; PUP, Achilles surgery. ADP 116 is still too high.</li>
+    <li><b>Tucker Kraft (TE, GB)</b> &mdash; ACL surgery. ADP 102 is too high.</li>
+    <li><b>Patrick Mahomes (QB, KC)</b> &mdash; ACL surgery. ADP 99 is a QB2 stash price, not a starter price. It also drags down <b>Rashee Rice</b> and <b>Xavier Worthy</b>.</li>
+    <li><b>Malik Nabers (WR, NYG)</b> &mdash; ACL recovery at ADP 30. Elite talent, genuine risk.</li>
+  </ul>
+</div>
+
+<div class="card alert amber">
+  <h2>Offseason moves worth double-checking before you draft</h2>
+  <p class="sub" style="margin-bottom:10px">Rosters changed a lot. These are the ones most likely to trip you up if you're working from memory:</p>
+  <ul>
+    <li><b>A.J. Brown &rarr; NE</b> &middot; <b>Kenneth Walker &rarr; KC</b> &middot; <b>Jaylen Waddle &rarr; DEN</b> &middot; <b>Mike Evans &rarr; SF</b></li>
+    <li><b>Travis Etienne &rarr; NO</b> &middot; <b>Michael Pittman &rarr; PIT</b> &middot; <b>Jakobi Meyers &rarr; JAX</b> &middot; <b>DJ Moore &rarr; BUF</b></li>
+    <li><b>Stefon Diggs &rarr; WAS</b> &middot; <b>Javonte Williams &rarr; DAL</b> &middot; <b>Wan'Dale Robinson &rarr; TEN</b> &middot; <b>Rashid Shaheed &rarr; SEA</b></li>
+    <li><b>Kyler Murray &rarr; MIN</b> &middot; <b>Tua &rarr; ATL</b> &middot; <b>Isiah Pacheco &rarr; DET</b> &middot; <b>Cooper Kupp &rarr; SEA</b></li>
+    <li><b>Tyreek Hill is a free agent</b> (no team, age 31, post-ACL) &mdash; he is not on this board.</li>
+    <li><b>Travis Kelce did not retire</b> &mdash; still KC, ADP 128, and a fine late flier.</li>
+  </ul>
+</div>
+
+<div class="card chg">
+  <h2>Changed since last refresh</h2>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T14:12:43</p>
+  <div class="grid">
+    <div>
+      <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
+      <h3>Injuries cleared</h3><p class="none">None cleared.</p>
+      <h3>Injury status changed</h3><p class="none">No status changes.</p>
+    </div>
+    <div>
+      <h3>ADP movers (&ge;5 picks)</h3><p class="none">No meaningful ADP movement.</p>
+      <h3>Projection movers (&ge;8 pts)</h3><p class="none">No projection changes.</p>
+      <h3>New to the market's top 120</h3><p class="none">Nobody new.</p>
+    </div>
+  </div>
+</div>
+
+<div class="tabwrap">
+  <div class="tabs" id="tabs"></div>
+  <div class="brief" id="brief"></div>
+</div>
+
+<div class="controls">
+  <input type="search" id="q" placeholder="Search player or team…" autocomplete="off">
+  <button class="btn on" data-pos="ALL">All</button>
+  <button class="btn" data-pos="QB">QB</button>
+  <button class="btn" data-pos="RB">RB</button>
+  <button class="btn" data-pos="WR">WR</button>
+  <button class="btn" data-pos="TE">TE</button>
+  <button class="btn" id="fVal">Values only</button>
+  <button class="btn" id="fHide">Hide drafted</button>
+  <button class="btn" id="reset">Reset</button>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="trk">
+  <span class="lead" id="trkState">Draft not started</span>
+  <button class="btn" id="mkThem">Mark taken</button>
+  <button class="btn" id="mkMine">Mark as mine</button>
+  <button class="btn" id="mkUndo">Undo</button>
+  <div class="rost" id="trkRoster"></div>
+</div>
+<p class="hint">Tick <b>Taken</b> to cross a player off, or <b>Mine</b> to add them to your roster.
+Fastest during a live draft: type a few letters in the search box and press <kbd>Enter</kbd>
+for taken, <kbd>Shift</kbd>+<kbd>Enter</kbd> for your own pick. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes
+the last mark. Everything saves to this browser automatically.</p>
+
+<div id="simpanel" style="display:none">
+  <div class="card sim">
+    <h2>Monte Carlo draft simulator</h2>
+    <p class="sub">Simulates the full 15-round draft thousands of times. Your nine opponents pick
+    from a randomised ADP order (each player's own draft-position variance), and your picks are chosen
+    by a randomised greedy policy on <b>value over replacement</b>. Every simulated roster is scored on
+    its best legal starting lineup, then the best-performing drafts are summarised into a plan.</p>
+    <div class="simctl">
+      <label>Your draft slot
+        <select id="simSlot">
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+      </label>
+      <label>Simulations
+        <select id="simN">
+          <option value="500">500 — instant</option>
+          <option value="2000" selected>2,000 — recommended</option>
+          <option value="6000">6,000 — thorough</option>
+          <option value="15000">15,000 — exhaustive</option>
+        </select>
+      </label>
+      <label class="chk"><input type="checkbox" id="simRisk" checked> Discount projections for injury risk</label>
+      <label class="chk"><input type="checkbox" id="simLive" checked> Resume from the draft I've recorded</label>
+      <button class="btn primary" id="simRun">Run simulation</button>
+      <span id="simStatus"></span>
+    </div>
+  </div>
+  <div id="simOut"></div>
+</div>
+
+<table id="tbl">
+<thead><tr>
+  <th class="ck" title="Drafted by someone else">Taken</th>
+  <th class="ck" title="Drafted by me">Mine</th>
+  <th class="s" data-k="rank">#</th>
+  <th class="s" data-k="name">Player</th>
+  <th>Pos</th>
+  <th>Tm</th>
+  <th class="s" data-k="adp">ADP</th>
+  <th class="s" data-k="rtg">Rtg</th>
+  <th class="s" data-k="delta">&Delta;</th>
+  <th class="s" data-k="bye">Bye</th>
+  <th>Read</th>
+</tr></thead>
+<tbody id="tb"></tbody>
+</table>
+
+<div class="two">
+<div class="card">
+  <h2>The biggest edge: wait on QB</h2>
+  <p>The market takes Josh Allen at <b>24.8</b> and Drake Maye at <b>46.2</b>. But <b>Jayden Daniels sits at 71.7</b> and <b>Jalen Hurts at 74.9</b> &mdash; both healthy, both with top-five upside and elite rushing floors.</p>
+  <p>In a 10-team 1QB league the gap between QB3 and QB10 is a few points a week. Taking Daniels or Hurts in Round 7 instead of Allen in Round 3 buys you an extra elite RB or WR at almost no positional cost. <b>Lamar Jackson at 50.9</b> is the middle-ground play if you want more certainty.</p>
+  <h3>Second edge: both elite TEs are cheap</h3>
+  <p><b>Trey McBride (44.0)</b> and <b>Brock Bowers (44.8)</b> are healthy with no injury tags, at a Round 5 price. That's a discount to their talent. Take one, then ignore the position.</p>
+</div>
+<div class="card">
+  <h2>Plan by draft slot</h2>
+  <h3>Picks 1&ndash;3</h3>
+  <p>Gibbs, Bijan, or Chase &mdash; no thought. Long wait to your second pick, so plan for <b>Jefferson (if he lasts past 15) plus an elite TE or RB</b> at the 2/3 turn. QB waits until Round 7.</p>
+  <h3>Picks 4&ndash;7</h3>
+  <p>Most flexible slot. JSN, Taylor, or London. Best-player-available through Round 4, then <b>McBride/Bowers in Round 5</b> and <b>Daniels/Hurts in Round 7</b>.</p>
+  <h3>Picks 8&ndash;10</h3>
+  <p>Achane or London should fall to you. Use the back-to-back picks to <b>double-tap RB</b> at the 2/3 turn (Chase Brown, Hampton, Love, Walker), then flood WR in Rounds 4&ndash;6 where <b>Higgins, Irving, and Brian Thomas Jr.</b> are all discounted.</p>
+</div>
+</div>
+
+<div class="card">
+  <h2>Rounds 13&ndash;15: kicker, defense, fliers</h2>
+  <div class="two">
+  <div>
+  <h3>Kicker &mdash; Round 14, not earlier</h3>
+  <p><b>Brandon Aubrey (DAL, ADP 131)</b> is the only kicker worth a deliberate pick. Otherwise <b>Ka'imi Fairbairn (HOU, 130)</b> or <b>Cam Little (JAX, 165)</b>. Kicker scoring is close to random; the only real edge is offensive quality.</p>
+  </div>
+  <div>
+  <h3>Defense &mdash; Round 15, then stream</h3>
+  <p>Denver (91) and Seattle (99) go far too early. Take <b>LAR (131)</b>, <b>NE (132)</b>, or <b>PHI (140)</b> and stream weekly off the schedule. Never carry two.</p>
+  </div>
+  </div>
+  <h3>What to do with the true last picks</h3>
+  <p>Two RB handcuffs to workhorse backs (<b>Jordan Mason</b>, <b>Blake Corum</b>, <b>Kyle Monangai</b>), one WR attached to a high-volume passing game, and <b>Travis Kelce at 128</b> as a free-roll TE2. Everything else at this depth belongs on the Week 2 waiver wire.</p>
+</div>
+
+<footer>
+  <p><b>How to use this page.</b> Use the <b>round tabs</b> to see only the players who should be on the table at that pick, with a strategy brief for each round. Click any row to mark a player drafted &mdash; it persists in this browser. Sort by any underlined column. <b>&Delta;</b> is market ADP minus my rank: <span style="color:var(--value);font-weight:600">positive means the player is falling to you</span>, negative means the market is paying up. Tabs, filters, and search all stack together.</p>
+  <p><b>Ratings scale.</b> 90+ foundational &middot; 80&ndash;89 high-end starter &middot; 70&ndash;79 reliable starter &middot; 60&ndash;69 flex or upside swing &middot; 50&ndash;59 bench with a path &middot; below 50 speculative.</p>
+  <p><b>Caveat.</b> ADP and injury designations are a snapshot from <b>2026-08-13</b>. Preseason "Questionable" tags are mostly noise &mdash; the ones that matter are surgical (ACL, Achilles, PUP) and are flagged in red. Re-check those the morning of your draft.</p>
+</footer>
+</div>
+
+<script>
+
+// ============================ Monte Carlo simulator ============================
+var POOL = [{"name": "Jahmyr Gibbs", "pos": "RB", "team": "DET", "adp": 1.5, "sd": 0.7, "bye": 6, "proj": 299.9, "est": false, "rm": 0.97, "myRank": 1, "rtg": 97, "tag": ""}, {"name": "Bijan Robinson", "pos": "RB", "team": "ATL", "adp": 2.1, "sd": 0.7, "bye": 11, "proj": 292.9, "est": false, "rm": 1.0, "myRank": 2, "rtg": 96, "tag": ""}, {"name": "Puka Nacua", "pos": "WR", "team": "LAR", "adp": 2.8, "sd": 0.6, "bye": 11, "proj": 259.0, "est": false, "rm": 0.97, "myRank": 6, "rtg": 90, "tag": "fade"}, {"name": "Ja'Marr Chase", "pos": "WR", "team": "CIN", "adp": 4.1, "sd": 1.0, "bye": 6, "proj": 256.6, "est": false, "rm": 1.0, "myRank": 3, "rtg": 95, "tag": "value"}, {"name": "Jaxon Smith-Njigba", "pos": "WR", "team": "SEA", "adp": 5.3, "sd": 1.3, "bye": 11, "proj": 235.1, "est": false, "rm": 1.0, "myRank": 4, "rtg": 93, "tag": ""}, {"name": "Jonathan Taylor", "pos": "RB", "team": "IND", "adp": 5.8, "sd": 1.3, "bye": 13, "proj": 254.3, "est": false, "rm": 1.0, "myRank": 5, "rtg": 91, "tag": ""}, {"name": "Christian McCaffrey", "pos": "RB", "team": "SF", "adp": 6.7, "sd": 1.6, "bye": 8, "proj": 256.0, "est": false, "rm": 0.97, "myRank": 10, "rtg": 85, "tag": "fade"}, {"name": "Amon-Ra St. Brown", "pos": "WR", "team": "DET", "adp": 7.6, "sd": 1.7, "bye": 6, "proj": 227.5, "est": false, "rm": 1.0, "myRank": 7, "rtg": 89, "tag": ""}, {"name": "Drake London", "pos": "WR", "team": "ATL", "adp": 9.6, "sd": 1.7, "bye": 11, "proj": 205.2, "est": false, "rm": 1.0, "myRank": 8, "rtg": 88, "tag": "value"}, {"name": "Derrick Henry", "pos": "RB", "team": "BAL", "adp": 10.0, "sd": 1.8, "bye": 13, "proj": 238.4, "est": false, "rm": 1.0, "myRank": 16, "rtg": 82, "tag": "fade"}, {"name": "De'Von Achane", "pos": "RB", "team": "MIA", "adp": 11.1, "sd": 1.9, "bye": 6, "proj": 217.9, "est": false, "rm": 1.0, "myRank": 9, "rtg": 86, "tag": "value"}, {"name": "James Cook III", "pos": "RB", "team": "BUF", "adp": 11.7, "sd": 2.9, "bye": 7, "proj": 245.3, "est": false, "rm": 1.0, "myRank": 12, "rtg": 84, "tag": ""}, {"name": "CeeDee Lamb", "pos": "WR", "team": "DAL", "adp": 12.6, "sd": 2.4, "bye": 14, "proj": 222.5, "est": false, "rm": 1.0, "myRank": 13, "rtg": 84, "tag": ""}, {"name": "Rashee Rice", "pos": "WR", "team": "KC", "adp": 12.8, "sd": 1.8, "bye": 5, "proj": 185.3, "est": false, "rm": 1.0, "myRank": 17, "rtg": 81, "tag": "fade"}, {"name": "Ashton Jeanty", "pos": "RB", "team": "LV", "adp": 14.8, "sd": 3.0, "bye": 13, "proj": 234.5, "est": false, "rm": 1.0, "myRank": 14, "rtg": 84, "tag": ""}, {"name": "Justin Jefferson", "pos": "WR", "team": "MIN", "adp": 15.2, "sd": 2.6, "bye": 6, "proj": 205.4, "est": false, "rm": 1.0, "myRank": 11, "rtg": 86, "tag": "value"}, {"name": "Chase Brown", "pos": "RB", "team": "CIN", "adp": 16.0, "sd": 2.6, "bye": 6, "proj": 226.7, "est": false, "rm": 1.0, "myRank": 15, "rtg": 82, "tag": ""}, {"name": "Saquon Barkley", "pos": "RB", "team": "PHI", "adp": 18.2, "sd": 3.3, "bye": 10, "proj": 228.2, "est": false, "rm": 1.0, "myRank": 18, "rtg": 81, "tag": ""}, {"name": "A.J. Brown", "pos": "WR", "team": "NE", "adp": 19.0, "sd": 2.7, "bye": 11, "proj": 207.7, "est": false, "rm": 1.0, "myRank": 22, "rtg": 79, "tag": ""}, {"name": "George Pickens", "pos": "WR", "team": "DAL", "adp": 19.5, "sd": 2.4, "bye": 14, "proj": 205.7, "est": false, "rm": 1.0, "myRank": 25, "rtg": 78, "tag": ""}, {"name": "Omarion Hampton", "pos": "RB", "team": "LAC", "adp": 21.9, "sd": 4.0, "bye": 7, "proj": 218.9, "est": false, "rm": 1.0, "myRank": 19, "rtg": 81, "tag": ""}, {"name": "Josh Jacobs", "pos": "RB", "team": "GB", "adp": 23.0, "sd": 3.2, "bye": 11, "proj": 186.1, "est": false, "rm": 0.97, "myRank": 26, "rtg": 78, "tag": ""}, {"name": "Chris Olave", "pos": "WR", "team": "NO", "adp": 23.3, "sd": 2.4, "bye": 8, "proj": 191.8, "est": false, "rm": 1.0, "myRank": 29, "rtg": 74, "tag": "fade"}, {"name": "Nico Collins", "pos": "WR", "team": "HOU", "adp": 23.3, "sd": 2.9, "bye": 8, "proj": 210.5, "est": false, "rm": 1.0, "myRank": 20, "rtg": 79, "tag": ""}, {"name": "Josh Allen", "pos": "QB", "team": "BUF", "adp": 24.8, "sd": 7.4, "bye": 7, "proj": 361.5, "est": false, "rm": 1.0, "myRank": 21, "rtg": 80, "tag": ""}, {"name": "Zay Flowers", "pos": "WR", "team": "BAL", "adp": 25.2, "sd": 2.6, "bye": 13, "proj": 187.7, "est": false, "rm": 1.0, "myRank": 27, "rtg": 77, "tag": ""}, {"name": "Kenneth Walker", "pos": "RB", "team": "KC", "adp": 26.4, "sd": 4.1, "bye": 5, "proj": 225.5, "est": false, "rm": 1.0, "myRank": 24, "rtg": 78, "tag": ""}, {"name": "Breece Hall", "pos": "RB", "team": "NYJ", "adp": 27.2, "sd": 3.4, "bye": 13, "proj": 195.6, "est": false, "rm": 1.0, "myRank": 28, "rtg": 76, "tag": ""}, {"name": "Jeremiyah Love", "pos": "RB", "team": "ARI", "adp": 29.3, "sd": 4.2, "bye": 14, "proj": 212.0, "est": false, "rm": 1.0, "myRank": 23, "rtg": 78, "tag": "value"}, {"name": "Malik Nabers", "pos": "WR", "team": "NYG", "adp": 30.3, "sd": 4.3, "bye": 8, "proj": 186.3, "est": false, "rm": 0.86, "myRank": 30, "rtg": 74, "tag": ""}, {"name": "Garrett Wilson", "pos": "WR", "team": "NYJ", "adp": 30.9, "sd": 3.4, "bye": 13, "proj": 183.4, "est": false, "rm": 1.0, "myRank": 32, "rtg": 74, "tag": ""}, {"name": "Kyren Williams", "pos": "RB", "team": "LAR", "adp": 31.1, "sd": 4.4, "bye": 11, "proj": 192.0, "est": false, "rm": 1.0, "myRank": 33, "rtg": 74, "tag": ""}, {"name": "DeVonta Smith", "pos": "WR", "team": "PHI", "adp": 31.3, "sd": 3.5, "bye": 10, "proj": 189.2, "est": false, "rm": 0.97, "myRank": 38, "rtg": 72, "tag": ""}, {"name": "Emeka Egbuka", "pos": "WR", "team": "TB", "adp": 32.5, "sd": 3.6, "bye": 10, "proj": 185.5, "est": false, "rm": 0.97, "myRank": 34, "rtg": 74, "tag": ""}, {"name": "Cam Skattebo", "pos": "RB", "team": "NYG", "adp": 34.3, "sd": 4.1, "bye": 8, "proj": 187.5, "est": false, "rm": 1.0, "myRank": 37, "rtg": 72, "tag": ""}, {"name": "Javonte Williams", "pos": "RB", "team": "DAL", "adp": 36.0, "sd": 4.1, "bye": 14, "proj": 188.8, "est": false, "rm": 1.0, "myRank": 46, "rtg": 70, "tag": "fade"}, {"name": "Tetairoa McMillan", "pos": "WR", "team": "CAR", "adp": 36.2, "sd": 3.5, "bye": 5, "proj": 184.5, "est": false, "rm": 1.0, "myRank": 36, "rtg": 73, "tag": ""}, {"name": "Tee Higgins", "pos": "WR", "team": "CIN", "adp": 38.0, "sd": 4.2, "bye": 6, "proj": 186.9, "est": false, "rm": 1.0, "myRank": 31, "rtg": 74, "tag": "value"}, {"name": "Davante Adams", "pos": "WR", "team": "LAR", "adp": 39.3, "sd": 3.8, "bye": 11, "proj": 161.0, "est": false, "rm": 1.0, "myRank": 48, "rtg": 69, "tag": "fade"}, {"name": "Travis Etienne Jr.", "pos": "RB", "team": "NO", "adp": 41.2, "sd": 5.3, "bye": 8, "proj": 189.7, "est": false, "rm": 1.0, "myRank": 52, "rtg": 67, "tag": ""}, {"name": "Jameson Williams", "pos": "WR", "team": "DET", "adp": 41.3, "sd": 3.6, "bye": 6, "proj": 176.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Terry McLaurin", "pos": "WR", "team": "WAS", "adp": 42.9, "sd": 3.9, "bye": 7, "proj": 176.8, "est": false, "rm": 1.0, "myRank": 49, "rtg": 68, "tag": ""}, {"name": "D'Andre Swift", "pos": "RB", "team": "CHI", "adp": 42.9, "sd": 5.4, "bye": 10, "proj": 187.2, "est": false, "rm": 1.0, "myRank": 57, "rtg": 64, "tag": "fade"}, {"name": "Trey McBride", "pos": "TE", "team": "ARI", "adp": 44.0, "sd": 8.9, "bye": 14, "proj": 186.9, "est": false, "rm": 1.0, "myRank": 41, "rtg": 80, "tag": "value"}, {"name": "Rome Odunze", "pos": "WR", "team": "CHI", "adp": 44.8, "sd": 3.9, "bye": 10, "proj": 173.9, "est": false, "rm": 1.0, "myRank": 47, "rtg": 69, "tag": ""}, {"name": "Brock Bowers", "pos": "TE", "team": "LV", "adp": 44.8, "sd": 11.0, "bye": 13, "proj": 202.5, "est": false, "rm": 1.0, "myRank": 42, "rtg": 80, "tag": "value"}, {"name": "Ladd McConkey", "pos": "WR", "team": "LAC", "adp": 44.9, "sd": 5.2, "bye": 7, "proj": 187.7, "est": false, "rm": 1.0, "myRank": 43, "rtg": 74, "tag": "value"}, {"name": "Bucky Irving", "pos": "RB", "team": "TB", "adp": 45.7, "sd": 5.3, "bye": 10, "proj": 179.3, "est": false, "rm": 1.0, "myRank": 35, "rtg": 73, "tag": "value"}, {"name": "Drake Maye", "pos": "QB", "team": "NE", "adp": 46.2, "sd": 7.7, "bye": 11, "proj": 320.8, "est": false, "rm": 1.0, "myRank": 45, "rtg": 74, "tag": ""}, {"name": "DJ Moore", "pos": "WR", "team": "BUF", "adp": 48.7, "sd": 5.5, "bye": 7, "proj": 147.5, "est": false, "rm": 1.0, "myRank": 50, "rtg": 68, "tag": ""}, {"name": "Quinshon Judkins", "pos": "RB", "team": "CLE", "adp": 49.0, "sd": 6.3, "bye": 11, "proj": 180.0, "est": false, "rm": 1.0, "myRank": 39, "rtg": 71, "tag": "value"}, {"name": "Alec Pierce", "pos": "WR", "team": "IND", "adp": 50.3, "sd": 5.8, "bye": 13, "proj": 150.9, "est": false, "rm": 0.62, "myRank": 80, "rtg": 48, "tag": "hardfade"}, {"name": "Lamar Jackson", "pos": "QB", "team": "BAL", "adp": 50.9, "sd": 9.6, "bye": 13, "proj": 326.0, "est": false, "rm": 1.0, "myRank": 44, "rtg": 78, "tag": "value"}, {"name": "Jaylen Waddle", "pos": "WR", "team": "DEN", "adp": 51.0, "sd": 7.0, "bye": 10, "proj": 182.5, "est": false, "rm": 0.97, "myRank": 53, "rtg": 65, "tag": ""}, {"name": "Bhayshul Tuten", "pos": "RB", "team": "JAX", "adp": 52.0, "sd": 5.3, "bye": 7, "proj": 158.8, "est": false, "rm": 1.0, "myRank": 56, "rtg": 65, "tag": ""}, {"name": "Luther Burden III", "pos": "WR", "team": "CHI", "adp": 55.6, "sd": 6.7, "bye": 10, "proj": 173.0, "est": false, "rm": 0.97, "myRank": 54, "rtg": 65, "tag": ""}, {"name": "Courtland Sutton", "pos": "WR", "team": "DEN", "adp": 55.7, "sd": 7.8, "bye": 10, "proj": 144.8, "est": false, "rm": 1.0, "myRank": 58, "rtg": 64, "tag": ""}, {"name": "Mike Evans", "pos": "WR", "team": "SF", "adp": 56.8, "sd": 6.4, "bye": 8, "proj": 187.2, "est": false, "rm": 0.97, "myRank": 69, "rtg": 60, "tag": "fade"}, {"name": "TreVeyon Henderson", "pos": "RB", "team": "NE", "adp": 57.3, "sd": 6.1, "bye": 11, "proj": 162.0, "est": false, "rm": 1.0, "myRank": 40, "rtg": 71, "tag": "value"}, {"name": "Joe Burrow", "pos": "QB", "team": "CIN", "adp": 57.6, "sd": 7.2, "bye": 6, "proj": 306.1, "est": false, "rm": 1.0, "myRank": 51, "rtg": 73, "tag": "value"}, {"name": "DK Metcalf", "pos": "WR", "team": "PIT", "adp": 62.3, "sd": 7.5, "bye": 9, "proj": 152.3, "est": false, "rm": 0.97, "myRank": 65, "rtg": 63, "tag": ""}, {"name": "Marvin Harrison Jr.", "pos": "WR", "team": "ARI", "adp": 62.3, "sd": 7.1, "bye": 14, "proj": 155.2, "est": false, "rm": 1.0, "myRank": 55, "rtg": 65, "tag": ""}, {"name": "Christian Watson", "pos": "WR", "team": "GB", "adp": 62.9, "sd": 6.8, "bye": 11, "proj": 176.1, "est": false, "rm": 1.0, "myRank": 60, "rtg": 64, "tag": ""}, {"name": "David Montgomery", "pos": "RB", "team": "HOU", "adp": 62.9, "sd": 7.7, "bye": 8, "proj": 185.6, "est": false, "rm": 1.0, "myRank": 67, "rtg": 62, "tag": ""}, {"name": "Colston Loveland", "pos": "TE", "team": "CHI", "adp": 66.1, "sd": 8.5, "bye": 10, "proj": 173.4, "est": false, "rm": 1.0, "myRank": 64, "rtg": 65, "tag": ""}, {"name": "Jadarian Price", "pos": "RB", "team": "SEA", "adp": 66.7, "sd": 13.3, "bye": 11, "proj": 160.5, "est": false, "rm": 0.97, "myRank": 66, "rtg": 62, "tag": ""}, {"name": "Tony Pollard", "pos": "RB", "team": "TEN", "adp": 66.8, "sd": 6.1, "bye": 9, "proj": 146.1, "est": false, "rm": 1.0, "myRank": 73, "rtg": 59, "tag": ""}, {"name": "Rico Dowdle", "pos": "RB", "team": "PIT", "adp": 67.2, "sd": 7.3, "bye": 9, "proj": 142.1, "est": false, "rm": 1.0, "myRank": 70, "rtg": 60, "tag": ""}, {"name": "Dak Prescott", "pos": "QB", "team": "DAL", "adp": 67.3, "sd": 6.6, "bye": 14, "proj": 303.9, "est": false, "rm": 1.0, "myRank": 79, "rtg": 57, "tag": ""}, {"name": "Parker Washington", "pos": "WR", "team": "JAX", "adp": 68.0, "sd": 6.3, "bye": 7, "proj": 176.4, "est": false, "rm": 1.0, "myRank": 77, "rtg": 57, "tag": ""}, {"name": "Brian Thomas Jr.", "pos": "WR", "team": "JAX", "adp": 69.5, "sd": 7.1, "bye": 7, "proj": 164.4, "est": false, "rm": 1.0, "myRank": 59, "rtg": 64, "tag": "value"}, {"name": "Tyler Warren", "pos": "TE", "team": "IND", "adp": 71.4, "sd": 12.0, "bye": 13, "proj": 159.6, "est": false, "rm": 1.0, "myRank": 63, "rtg": 68, "tag": "value"}, {"name": "Jayden Daniels", "pos": "QB", "team": "WAS", "adp": 71.7, "sd": 10.1, "bye": 7, "proj": 308.7, "est": false, "rm": 1.0, "myRank": 61, "rtg": 72, "tag": "value"}, {"name": "Rhamondre Stevenson", "pos": "RB", "team": "NE", "adp": 72.0, "sd": 6.0, "bye": 11, "proj": 151.8, "est": false, "rm": 1.0, "myRank": 74, "rtg": 58, "tag": ""}, {"name": "Jalen Hurts", "pos": "QB", "team": "PHI", "adp": 74.9, "sd": 9.4, "bye": 10, "proj": 310.5, "est": false, "rm": 1.0, "myRank": 62, "rtg": 71, "tag": "value"}, {"name": "Carnell Tate", "pos": "WR", "team": "TEN", "adp": 75.1, "sd": 6.9, "bye": 9, "proj": 154.8, "est": false, "rm": 1.0, "myRank": 68, "rtg": 61, "tag": ""}, {"name": "Brock Purdy", "pos": "QB", "team": "SF", "adp": 75.5, "sd": 13.2, "bye": 8, "proj": 303.2, "est": false, "rm": 1.0, "myRank": 97, "rtg": 56, "tag": ""}, {"name": "Jaylen Warren", "pos": "RB", "team": "PIT", "adp": 76.7, "sd": 7.4, "bye": 9, "proj": 152.6, "est": false, "rm": 1.0, "myRank": 75, "rtg": 58, "tag": ""}, {"name": "Chuba Hubbard", "pos": "RB", "team": "CAR", "adp": 76.8, "sd": 7.4, "bye": 5, "proj": 148.4, "est": false, "rm": 0.97, "myRank": 76, "rtg": 58, "tag": ""}, {"name": "Matthew Stafford", "pos": "QB", "team": "LAR", "adp": 77.2, "sd": 9.8, "bye": 11, "proj": 280.2, "est": false, "rm": 1.0, "myRank": 98, "rtg": 55, "tag": ""}, {"name": "Jakobi Meyers", "pos": "WR", "team": "JAX", "adp": 79.2, "sd": 7.1, "bye": 7, "proj": 137.3, "est": false, "rm": 1.0, "myRank": 78, "rtg": 57, "tag": ""}, {"name": "Michael Pittman Jr.", "pos": "WR", "team": "PIT", "adp": 80.5, "sd": 7.2, "bye": 9, "proj": 136.4, "est": false, "rm": 0.97, "myRank": 83, "rtg": 56, "tag": ""}, {"name": "Wan'Dale Robinson", "pos": "WR", "team": "TEN", "adp": 80.9, "sd": 8.4, "bye": 9, "proj": 130.1, "est": false, "rm": 1.0, "myRank": 85, "rtg": 55, "tag": ""}, {"name": "Quentin Johnston", "pos": "WR", "team": "LAC", "adp": 81.6, "sd": 7.3, "bye": 7, "proj": 134.9, "est": false, "rm": 1.0, "myRank": 86, "rtg": 55, "tag": ""}, {"name": "Kyle Pitts Sr.", "pos": "TE", "team": "ATL", "adp": 82.4, "sd": 7.7, "bye": 11, "proj": 138.6, "est": false, "rm": 1.0, "myRank": 84, "rtg": 56, "tag": ""}, {"name": "Harold Fannin Jr.", "pos": "TE", "team": "CLE", "adp": 84.6, "sd": 8.9, "bye": 11, "proj": 143.4, "est": false, "rm": 1.0, "myRank": 87, "rtg": 55, "tag": ""}, {"name": "Michael Wilson", "pos": "WR", "team": "ARI", "adp": 84.9, "sd": 10.0, "bye": 14, "proj": 136.5, "est": false, "rm": 1.0, "myRank": 88, "rtg": 54, "tag": ""}, {"name": "Jordyn Tyson", "pos": "WR", "team": "NO", "adp": 85.3, "sd": 10.0, "bye": 8, "proj": 145.6, "est": false, "rm": 0.97, "myRank": 72, "rtg": 60, "tag": ""}, {"name": "J.K. Dobbins", "pos": "RB", "team": "DEN", "adp": 86.4, "sd": 8.5, "bye": 10, "proj": 147.2, "est": false, "rm": 0.97, "myRank": 81, "rtg": 56, "tag": ""}, {"name": "RJ Harvey", "pos": "RB", "team": "DEN", "adp": 88.4, "sd": 10.6, "bye": 10, "proj": 125.6, "est": false, "rm": 1.0, "myRank": 82, "rtg": 56, "tag": ""}, {"name": "Trevor Lawrence", "pos": "QB", "team": "JAX", "adp": 88.7, "sd": 11.3, "bye": 7, "proj": 303.4, "est": false, "rm": 1.0, "myRank": 99, "rtg": 55, "tag": ""}, {"name": "Chris Godwin Jr.", "pos": "WR", "team": "TB", "adp": 90.1, "sd": 12.3, "bye": 10, "proj": 139.6, "est": false, "rm": 1.0, "myRank": 90, "rtg": 54, "tag": ""}, {"name": "Deebo Samuel Sr.", "pos": "WR", "team": "SF", "adp": 90.3, "sd": 11.4, "bye": 8, "proj": 127.7, "est": false, "rm": 1.0, "myRank": 91, "rtg": 54, "tag": ""}, {"name": "Jayden Reed", "pos": "WR", "team": "GB", "adp": 90.5, "sd": 8.8, "bye": 11, "proj": 162.6, "est": false, "rm": 1.0, "myRank": 92, "rtg": 54, "tag": ""}, {"name": "Denver Defense", "pos": "DEF", "team": "DEN", "adp": 91.0, "sd": 10.6, "bye": 10, "proj": 96.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jordan Addison", "pos": "WR", "team": "MIN", "adp": 91.2, "sd": 9.6, "bye": 6, "proj": 141.7, "est": false, "rm": 0.97, "myRank": 94, "rtg": 53, "tag": ""}, {"name": "Sam LaPorta", "pos": "TE", "team": "DET", "adp": 92.6, "sd": 9.9, "bye": 6, "proj": 158.5, "est": false, "rm": 1.0, "myRank": 71, "rtg": 60, "tag": "value"}, {"name": "Stefon Diggs", "pos": "WR", "team": "WAS", "adp": 93.3, "sd": 11.9, "bye": 7, "proj": 125.3, "est": false, "rm": 1.0, "myRank": 93, "rtg": 53, "tag": ""}, {"name": "Aaron Jones Sr.", "pos": "RB", "team": "MIN", "adp": 96.5, "sd": 12.5, "bye": 6, "proj": 120.1, "est": false, "rm": 1.0, "myRank": 89, "rtg": 54, "tag": ""}, {"name": "Josh Downs", "pos": "WR", "team": "IND", "adp": 97.3, "sd": 9.6, "bye": 13, "proj": 143.4, "est": false, "rm": 0.97, "myRank": 96, "rtg": 52, "tag": ""}, {"name": "Kenny Gainwell", "pos": "RB", "team": "TB", "adp": 98.1, "sd": 10.5, "bye": 10, "proj": 128.8, "est": false, "rm": 1.0, "myRank": 95, "rtg": 53, "tag": ""}, {"name": "Jaxson Dart", "pos": "QB", "team": "NYG", "adp": 98.6, "sd": 16.7, "bye": 8, "proj": 296.5, "est": false, "rm": 1.0, "myRank": 104, "rtg": 52, "tag": ""}, {"name": "Seattle Defense", "pos": "DEF", "team": "SEA", "adp": 99.0, "sd": 10.1, "bye": 11, "proj": 103.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Patrick Mahomes", "pos": "QB", "team": "KC", "adp": 99.2, "sd": 11.7, "bye": 5, "proj": 286.7, "est": false, "rm": 0.86, "myRank": 105, "rtg": 52, "tag": ""}, {"name": "Xavier Worthy", "pos": "WR", "team": "KC", "adp": 101.1, "sd": 9.3, "bye": 5, "proj": 134.0, "est": false, "rm": 0.97, "myRank": 101, "rtg": 52, "tag": ""}, {"name": "Makai Lemon", "pos": "WR", "team": "PHI", "adp": 102.0, "sd": 9.0, "bye": 10, "proj": 138.5, "est": false, "rm": 0.97, "myRank": 102, "rtg": 52, "tag": ""}, {"name": "Tucker Kraft", "pos": "TE", "team": "GB", "adp": 102.1, "sd": 17.8, "bye": 11, "proj": 140.9, "est": false, "rm": 0.86, "myRank": 119, "rtg": 42, "tag": "fade"}, {"name": "Kyle Monangai", "pos": "RB", "team": "CHI", "adp": 102.6, "sd": 13.9, "bye": 10, "proj": 143.1, "est": false, "rm": 1.0, "myRank": 100, "rtg": 52, "tag": ""}, {"name": "Khalil Shakir", "pos": "WR", "team": "BUF", "adp": 103.2, "sd": 8.9, "bye": 7, "proj": 132.0, "est": false, "rm": 1.0, "myRank": 103, "rtg": 52, "tag": ""}, {"name": "Justin Herbert", "pos": "QB", "team": "LAC", "adp": 103.9, "sd": 13.6, "bye": 7, "proj": 295.5, "est": false, "rm": 1.0, "myRank": 108, "rtg": 51, "tag": ""}, {"name": "Caleb Williams", "pos": "QB", "team": "CHI", "adp": 103.9, "sd": 17.4, "bye": 10, "proj": 299.3, "est": false, "rm": 1.0, "myRank": 109, "rtg": 51, "tag": ""}, {"name": "Rachaad White", "pos": "RB", "team": "WAS", "adp": 107.0, "sd": 13.1, "bye": 7, "proj": 111.1, "est": false, "rm": 1.0, "myRank": 106, "rtg": 51, "tag": ""}, {"name": "Dallas Goedert", "pos": "TE", "team": "PHI", "adp": 107.4, "sd": 17.4, "bye": 10, "proj": 109.5, "est": false, "rm": 1.0, "myRank": 110, "rtg": 50, "tag": ""}, {"name": "Houston Defense", "pos": "DEF", "team": "HOU", "adp": 108.0, "sd": 10.9, "bye": 8, "proj": 104.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jared Goff", "pos": "QB", "team": "DET", "adp": 108.8, "sd": 12.0, "bye": 6, "proj": 283.5, "est": false, "rm": 1.0, "myRank": 111, "rtg": 50, "tag": ""}, {"name": "Romeo Doubs", "pos": "WR", "team": "NE", "adp": 109.2, "sd": 9.0, "bye": 11, "proj": 132.7, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jacory Croskey-Merritt", "pos": "RB", "team": "WAS", "adp": 109.5, "sd": 14.1, "bye": 7, "proj": 118.4, "est": false, "rm": 1.0, "myRank": 107, "rtg": 50, "tag": ""}, {"name": "Ricky Pearsall", "pos": "WR", "team": "SF", "adp": 111.5, "sd": 4.4, "bye": 8, "proj": 127.4, "est": true, "rm": 0.97, "myRank": 117, "rtg": 48, "tag": ""}, {"name": "Jonathon Brooks", "pos": "RB", "team": "CAR", "adp": 112.1, "sd": 17.5, "bye": 5, "proj": 108.5, "est": false, "rm": 1.0, "myRank": 116, "rtg": 49, "tag": ""}, {"name": "Matthew Golden", "pos": "WR", "team": "GB", "adp": 115.9, "sd": 10.0, "bye": 11, "proj": 141.1, "est": false, "rm": 1.0, "myRank": 114, "rtg": 49, "tag": ""}, {"name": "George Kittle", "pos": "TE", "team": "SF", "adp": 116.0, "sd": 17.1, "bye": 8, "proj": 138.3, "est": false, "rm": 0.62, "myRank": 120, "rtg": 40, "tag": "fade"}, {"name": "Rashid Shaheed", "pos": "WR", "team": "SEA", "adp": 117.0, "sd": 9.7, "bye": 11, "proj": 115.6, "est": false, "rm": 1.0, "myRank": 115, "rtg": 49, "tag": ""}, {"name": "Jordan Mason", "pos": "RB", "team": "MIN", "adp": 117.4, "sd": 16.1, "bye": 6, "proj": 143.7, "est": false, "rm": 1.0, "myRank": 112, "rtg": 50, "tag": ""}, {"name": "Bo Nix", "pos": "QB", "team": "DEN", "adp": 118.6, "sd": 14.3, "bye": 10, "proj": 295.7, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Blake Corum", "pos": "RB", "team": "LAR", "adp": 119.8, "sd": 15.7, "bye": 11, "proj": 127.8, "est": false, "rm": 1.0, "myRank": 113, "rtg": 49, "tag": ""}, {"name": "Minnesota Defense", "pos": "DEF", "team": "MIN", "adp": 121.2, "sd": 6.3, "bye": 6, "proj": 92.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "John Metchie III", "pos": "WR", "team": "CAR", "adp": 121.6, "sd": 6.2, "bye": 5, "proj": 38.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Detroit Defense", "pos": "DEF", "team": "DET", "adp": 123.7, "sd": 3.9, "bye": 6, "proj": 92.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jalen Coker", "pos": "WR", "team": "CAR", "adp": 124.6, "sd": 11.4, "bye": 5, "proj": 135.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "KC Concepcion", "pos": "WR", "team": "CLE", "adp": 127.4, "sd": 10.9, "bye": 11, "proj": 127.4, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Travis Kelce", "pos": "TE", "team": "KC", "adp": 128.1, "sd": 15.1, "bye": 5, "proj": 136.4, "est": false, "rm": 1.0, "myRank": 118, "rtg": 47, "tag": "value"}, {"name": "Calvin Ridley", "pos": "WR", "team": "TEN", "adp": 129.4, "sd": 11.8, "bye": 9, "proj": 63.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Ka'imi Fairbairn", "pos": "K", "team": "HOU", "adp": 130.2, "sd": 23.6, "bye": 8, "proj": 113.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jayden Higgins", "pos": "WR", "team": "HOU", "adp": 130.6, "sd": 11.7, "bye": 8, "proj": 136.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "LA Rams Defense", "pos": "DEF", "team": "LAR", "adp": 130.7, "sd": 18.7, "bye": 11, "proj": 106.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Brandon Aubrey", "pos": "K", "team": "DAL", "adp": 130.9, "sd": 22.9, "bye": 14, "proj": 116.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Theo Wease Jr.", "pos": "WR", "team": "MIA", "adp": 131.2, "sd": 13.8, "bye": 6, "proj": 55.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Harrison Mevis", "pos": "K", "team": "LAR", "adp": 132.0, "sd": 11.1, "bye": 11, "proj": 106.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "New England Defense", "pos": "DEF", "team": "NE", "adp": 132.2, "sd": 18.1, "bye": 11, "proj": 92.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jason Myers", "pos": "K", "team": "SEA", "adp": 133.2, "sd": 19.4, "bye": 11, "proj": 111.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Baker Mayfield", "pos": "QB", "team": "TB", "adp": 133.2, "sd": 10.6, "bye": 10, "proj": 274.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Zach Charbonnet", "pos": "RB", "team": "SEA", "adp": 134.2, "sd": 21.9, "bye": 11, "proj": 61.7, "est": false, "rm": 0.62, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tre Tucker", "pos": "WR", "team": "LV", "adp": 135.5, "sd": 7.1, "bye": 13, "proj": 91.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jerry Jeudy", "pos": "WR", "team": "CLE", "adp": 135.9, "sd": 6.6, "bye": 11, "proj": 98.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Rashod Bateman", "pos": "WR", "team": "BAL", "adp": 136.0, "sd": 15.1, "bye": 13, "proj": 70.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Isaiah Likely", "pos": "TE", "team": "NYG", "adp": 136.0, "sd": 20.2, "bye": 8, "proj": 126.3, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tyler Shough", "pos": "QB", "team": "NO", "adp": 137.3, "sd": 11.6, "bye": 8, "proj": 270.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Mark Andrews", "pos": "TE", "team": "BAL", "adp": 137.5, "sd": 20.2, "bye": 13, "proj": 132.5, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jalen McMillan", "pos": "WR", "team": "TB", "adp": 139.4, "sd": 13.2, "bye": 10, "proj": 105.4, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "Philadelphia Defense", "pos": "DEF", "team": "PHI", "adp": 139.8, "sd": 16.7, "bye": 10, "proj": 98.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jalen Nailor", "pos": "WR", "team": "LV", "adp": 143.7, "sd": 12.5, "bye": 13, "proj": 107.6, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "LA Chargers Defense", "pos": "DEF", "team": "LAC", "adp": 143.7, "sd": 16.8, "bye": 7, "proj": 86.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Isiah Pacheco", "pos": "RB", "team": "DET", "adp": 143.7, "sd": 21.8, "bye": 6, "proj": 48.6, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "Cameron Dicker", "pos": "K", "team": "LAC", "adp": 143.8, "sd": 18.3, "bye": 7, "proj": 106.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Dalton Kincaid", "pos": "TE", "team": "BUF", "adp": 144.5, "sd": 19.3, "bye": 7, "proj": 130.6, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Alvin Kamara", "pos": "RB", "team": "NO", "adp": 144.9, "sd": 19.8, "bye": 8, "proj": 53.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Woody Marks", "pos": "RB", "team": "HOU", "adp": 145.3, "sd": 17.0, "bye": 8, "proj": 74.3, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Sam Darnold", "pos": "QB", "team": "SEA", "adp": 145.4, "sd": 8.5, "bye": 11, "proj": 262.7, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tank Dell", "pos": "WR", "team": "HOU", "adp": 145.5, "sd": 13.4, "bye": 8, "proj": 57.4, "est": false, "rm": 0.86, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jauan Jennings", "pos": "WR", "team": "MIN", "adp": 146.5, "sd": 12.3, "bye": 6, "proj": 86.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jake Ferguson", "pos": "TE", "team": "DAL", "adp": 146.6, "sd": 19.1, "bye": 14, "proj": 124.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Kyler Murray", "pos": "QB", "team": "MIN", "adp": 146.9, "sd": 17.5, "bye": 6, "proj": 265.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "James Conner", "pos": "RB", "team": "ARI", "adp": 147.6, "sd": 11.3, "bye": 14, "proj": 51.7, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tyjae Spears", "pos": "RB", "team": "TEN", "adp": 147.7, "sd": 15.3, "bye": 9, "proj": 97.1, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "De'Zhaun Stribling", "pos": "WR", "team": "SF", "adp": 148.0, "sd": 15.1, "bye": 8, "proj": 105.4, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Keaton Mitchell", "pos": "RB", "team": "LAC", "adp": 148.1, "sd": 29.7, "bye": 7, "proj": 87.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jordan Love", "pos": "QB", "team": "GB", "adp": 148.6, "sd": 16.6, "bye": 11, "proj": 278.5, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jake Bates", "pos": "K", "team": "DET", "adp": 149.1, "sd": 16.8, "bye": 6, "proj": 105.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jacksonville Defense", "pos": "DEF", "team": "JAX", "adp": 149.6, "sd": 16.1, "bye": 7, "proj": 91.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Denzel Boston", "pos": "WR", "team": "CLE", "adp": 150.0, "sd": 15.6, "bye": 11, "proj": 99.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Kimani Vidal", "pos": "RB", "team": "LAC", "adp": 150.2, "sd": 37.9, "bye": 7, "proj": 53.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tyler Allgeier", "pos": "RB", "team": "ARI", "adp": 150.5, "sd": 28.6, "bye": 14, "proj": 65.4, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Pittsburgh Defense", "pos": "DEF", "team": "PIT", "adp": 152.8, "sd": 13.5, "bye": 9, "proj": 88.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Malik Washington", "pos": "WR", "team": "MIA", "adp": 153.5, "sd": 21.2, "bye": 6, "proj": 82.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Will Reichard", "pos": "K", "team": "MIN", "adp": 154.1, "sd": 19.5, "bye": 6, "proj": 109.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jonah Coleman", "pos": "RB", "team": "DEN", "adp": 154.2, "sd": 9.9, "bye": 10, "proj": 58.9, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Cairo Santos", "pos": "K", "team": "CHI", "adp": 155.1, "sd": 15.3, "bye": 10, "proj": 100.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Cooper Kupp", "pos": "WR", "team": "SEA", "adp": 155.5, "sd": 20.4, "bye": 11, "proj": 70.4, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tyler Loop", "pos": "K", "team": "BAL", "adp": 156.1, "sd": 14.4, "bye": 13, "proj": 106.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Nick Folk", "pos": "K", "team": "ATL", "adp": 156.2, "sd": 13.6, "bye": 11, "proj": 95.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Hunter Henry", "pos": "TE", "team": "NE", "adp": 156.8, "sd": 28.8, "bye": 11, "proj": 124.5, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Daniel Jones", "pos": "QB", "team": "IND", "adp": 156.9, "sd": 17.6, "bye": 13, "proj": 223.5, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Juwan Johnson", "pos": "TE", "team": "NO", "adp": 157.1, "sd": 25.9, "bye": 8, "proj": 109.6, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Travis Hunter", "pos": "WR", "team": "JAX", "adp": 157.3, "sd": 15.8, "bye": 7, "proj": 83.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Brenton Strange", "pos": "TE", "team": "JAX", "adp": 157.5, "sd": 22.4, "bye": 7, "proj": 129.5, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Chris Rodriguez Jr.", "pos": "RB", "team": "JAX", "adp": 158.2, "sd": 20.0, "bye": 7, "proj": 125.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tyrone Tracy Jr.", "pos": "RB", "team": "NYG", "adp": 158.3, "sd": 17.7, "bye": 8, "proj": 100.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Antonio Williams", "pos": "WR", "team": "WAS", "adp": 158.5, "sd": 15.5, "bye": 7, "proj": 61.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Adonai Mitchell", "pos": "WR", "team": "NYJ", "adp": 158.6, "sd": 13.7, "bye": 13, "proj": 80.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Eddy Pi\u00f1eiro", "pos": "K", "team": "SF", "adp": 159.1, "sd": 17.2, "bye": 8, "proj": 101.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "T.J. Hockenson", "pos": "TE", "team": "MIN", "adp": 159.7, "sd": 19.1, "bye": 6, "proj": 122.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Buffalo Defense", "pos": "DEF", "team": "BUF", "adp": 160.3, "sd": 18.6, "bye": 7, "proj": 84.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Chase McLaughlin", "pos": "K", "team": "TB", "adp": 160.4, "sd": 15.3, "bye": 10, "proj": 105.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Ja'Kobi Lane", "pos": "WR", "team": "BAL", "adp": 160.6, "sd": 20.3, "bye": 13, "proj": 74.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Malik Willis", "pos": "QB", "team": "MIA", "adp": 160.7, "sd": 14.4, "bye": 6, "proj": 270.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tank Bigsby", "pos": "RB", "team": "PHI", "adp": 161.5, "sd": 33.9, "bye": 10, "proj": 61.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Jordan James", "pos": "RB", "team": "SF", "adp": 162.4, "sd": 9.3, "bye": 8, "proj": 54.2, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "Omar Cooper Jr.", "pos": "WR", "team": "NYJ", "adp": 163.2, "sd": 11.6, "bye": 13, "proj": 104.6, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Kenyon Sadiq", "pos": "TE", "team": "NYJ", "adp": 163.2, "sd": 18.6, "bye": 13, "proj": 80.2, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "Ryan Flournoy", "pos": "WR", "team": "DAL", "adp": 164.2, "sd": 13.2, "bye": 14, "proj": 97.7, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Dylan Sampson", "pos": "RB", "team": "CLE", "adp": 164.6, "sd": 28.0, "bye": 11, "proj": 77.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Cam Little", "pos": "K", "team": "JAX", "adp": 164.6, "sd": 18.1, "bye": 7, "proj": 112.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Kaelon Black", "pos": "RB", "team": "SF", "adp": 165.2, "sd": 9.4, "bye": 8, "proj": 39.3, "est": false, "rm": 0.97, "myRank": null, "rtg": null, "tag": ""}, {"name": "Tennessee Defense", "pos": "DEF", "team": "TEN", "adp": 165.3, "sd": 11.2, "bye": 9, "proj": 67.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Harrison Butker", "pos": "K", "team": "KC", "adp": 165.6, "sd": 15.6, "bye": 5, "proj": 100.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Baltimore Defense", "pos": "DEF", "team": "BAL", "adp": 165.9, "sd": 14.2, "bye": 13, "proj": 95.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Evan McPherson", "pos": "K", "team": "CIN", "adp": 166.9, "sd": 14.8, "bye": 6, "proj": 106.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Chris Boswell", "pos": "K", "team": "PIT", "adp": 167.6, "sd": 10.2, "bye": 9, "proj": 107.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Atlanta Defense", "pos": "DEF", "team": "ATL", "adp": 167.6, "sd": 11.8, "bye": 11, "proj": 83.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Mike Washington Jr.", "pos": "RB", "team": "LV", "adp": 168.1, "sd": 23.7, "bye": 13, "proj": 57.5, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Kayshon Boutte", "pos": "WR", "team": "NE", "adp": 168.9, "sd": 23.5, "bye": 11, "proj": 79.1, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "C.J. Stroud", "pos": "QB", "team": "HOU", "adp": 169.6, "sd": 11.7, "bye": 8, "proj": 238.2, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "New Orleans Defense", "pos": "DEF", "team": "NO", "adp": 170.8, "sd": 11.8, "bye": 8, "proj": 77.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Wil Lutz", "pos": "K", "team": "DEN", "adp": 171.8, "sd": 10.5, "bye": 10, "proj": 100.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Chig Okonkwo", "pos": "TE", "team": "WAS", "adp": 176.3, "sd": 14.9, "bye": 7, "proj": 113.6, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Cleveland Defense", "pos": "DEF", "team": "CLE", "adp": 180.6, "sd": 18.3, "bye": 11, "proj": 74.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Andy Borregales", "pos": "K", "team": "NE", "adp": 183.3, "sd": 24.7, "bye": 11, "proj": 96.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Cam Ward", "pos": "QB", "team": "TEN", "adp": 184.9, "sd": 21.9, "bye": 9, "proj": 227.8, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}, {"name": "Miami Defense", "pos": "DEF", "team": "MIA", "adp": 190.4, "sd": 15.0, "bye": 6, "proj": 62.0, "est": false, "rm": 1.0, "myRank": null, "rtg": null, "tag": ""}];
+
+// ---- Monte Carlo draft simulator (engine only; embedded verbatim in the board) ----
+var SIMCFG = {
+  teams: 10, rounds: 15,
+  starters: { QB:1, RB:2, WR:3, TE:1, FLEX:1, K:1, DEF:1 },
+  flexPos: ['RB','WR','TE'],
+  caps: { QB:2, RB:6, WR:7, TE:2, K:1, DEF:1 },
+  replIdx: { QB:10, RB:25, WR:33, TE:11, K:10, DEF:10 },
+  topM: 6
+};
+
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0;
+  var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+
+function gauss(rnd){ var u=0,v=0; while(u===0)u=rnd(); while(v===0)v=rnd();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+// pick number -> team index (0-based), snake
+function teamAt(pick, teams){
+  var r = Math.floor((pick-1)/teams), i = (pick-1)%teams;
+  return (r%2===0) ? i : (teams-1-i);
+}
+function myPickNumbers(slot, teams, rounds){
+  var out=[];
+  for(var r=1;r<=rounds;r++) out.push((r-1)*teams + (r%2===1 ? slot : teams-slot+1));
+  return out;
+}
+
+function buildReplacement(pool, useRisk){
+  var byPos={}, repl={};
+  pool.forEach(function(p){ (byPos[p.pos]=byPos[p.pos]||[]).push(useRisk?p.proj*p.rm:p.proj); });
+  Object.keys(byPos).forEach(function(k){
+    byPos[k].sort(function(a,b){return b-a;});
+    var i=Math.min(byPos[k].length-1,(SIMCFG.replIdx[k]||10)-1);
+    repl[k]=byPos[k][i]||0;
+  });
+  return repl;
+}
+
+function emptyRoster(){ return {QB:[],RB:[],WR:[],TE:[],K:[],DEF:[],all:[]}; }
+
+function canTake(ros, pos, round){
+  if(ros[pos].length >= SIMCFG.caps[pos]) return false;
+  if((pos==='K'||pos==='DEF') && round < 12) return false;   // nobody sane drafts these early
+  return true;
+}
+
+// starting-slot need: is this position still needed for a STARTING slot?
+function startersOpen(ros, pos){  // can this pos still fill a STARTING slot?
+  var s=SIMCFG.starters;
+  if(pos==='K'||pos==='DEF'||pos==='QB') return ros[pos].length < s[pos];
+  if(ros[pos].length < s[pos]) return true;
+  // flex still open?
+  var used=0; SIMCFG.flexPos.forEach(function(q){ used += Math.min(ros[q].length, s[q]); });
+  var need=0;  SIMCFG.flexPos.forEach(function(q){ need += s[q]; });
+  var flexFilled=0;
+  SIMCFG.flexPos.forEach(function(q){ flexFilled += Math.max(0, ros[q].length - s[q]); });
+  return flexFilled < s.FLEX;
+}
+
+function bestLineup(ros, ep){
+  var s=SIMCFG.starters, total=0, used={}, lineup=[];
+  function take(pos,n){
+    var arr=ros[pos].slice().sort(function(a,b){return ep(b)-ep(a);});
+    for(var i=0;i<n && i<arr.length;i++){ total+=ep(arr[i]); used[arr[i].name]=1;
+      lineup.push({slot:pos,p:arr[i]}); }
+  }
+  take('QB',s.QB); take('RB',s.RB); take('WR',s.WR); take('TE',s.TE);
+  take('K',s.K);  take('DEF',s.DEF);
+  var flex=[];
+  SIMCFG.flexPos.forEach(function(q){ ros[q].forEach(function(p){ if(!used[p.name]) flex.push(p); }); });
+  flex.sort(function(a,b){return ep(b)-ep(a);});
+  for(var i=0;i<s.FLEX && i<flex.length;i++){ total+=ep(flex[i]); lineup.push({slot:'FLEX',p:flex[i]}); }
+  return {total: total, lineup: lineup};
+}
+
+// state (optional): {history:[{n,m}]} — an ordered record of picks already made.
+// Players in it are unavailable; the ones flagged m:true preload MY roster; and the
+// simulation resumes at pick history.length+1 instead of pick 1.
+function runSim(pool, slot, sims, useRisk, seed, state){
+  var teams=SIMCFG.teams, rounds=SIMCFG.rounds, totalPicks=teams*rounds;
+  var repl=buildReplacement(pool, useRisk);
+  var ep=function(p){ return useRisk ? p.proj*p.rm : p.proj; };
+  var mine=myPickNumbers(slot, teams, rounds);
+
+  // ---- resolve live draft state ----
+  var hist = (state && state.history) ? state.history : [];
+  var byName={}; pool.forEach(function(p,i){ byName[p.name]=i; });
+  var preTaken={}, preMine=[];
+  hist.forEach(function(h){
+    var i=byName[h.n];
+    if(i===undefined) return;          // marked a player who isn't in the pool
+    preTaken[i]=1;
+    if(h.m) preMine.push(i);
+  });
+  var startPick = hist.length + 1;
+
+  var rnd=mulberry32(seed||12345);
+  var n=pool.length;
+  var future = mine.filter(function(p){ return p >= startPick; });
+  var mineSet={}; future.forEach(function(p,i){ mineSet[p]=i; });
+  var scores=[], best=null, allSims=[];
+  var planCounts=future.map(function(){ return {}; });
+  var availCounts={}; pool.forEach(function(p){ availCounts[p.name]=future.map(function(){return 0;}); });
+  var idx=new Array(n), score=new Float64Array(n), taken=new Uint8Array(n);
+
+  for(var s=0;s<sims;s++){
+    for(var i=0;i<n;i++){
+      var p=pool[i];
+      var sigma=Math.max(p.sd||0, 1.5 + 0.05*p.adp);
+      score[i]=p.adp + gauss(rnd)*sigma;
+      idx[i]=i; taken[i]=0;
+    }
+    idx.sort(function(a,b){ return score[a]-score[b]; });
+
+    var rosters=[]; for(var t=0;t<teams;t++) rosters.push(emptyRoster());
+    var myPicksThisSim=[];
+    var temp = 0.15 + rnd()*1.15;   // exploration temperature, varies per sim
+
+    // ---- replay what already happened ----
+    for(var h=0;h<hist.length;h++){
+      var hi=byName[hist[h].n];
+      if(hi===undefined) continue;
+      taken[hi]=1;
+      var hp=pool[hi];
+      // my marked picks go to my roster; everything else is spread across the
+      // opponents by snake order so their future behaviour stays plausible
+      var owner = hist[h].m ? (slot-1) : teamAt(h+1, teams);
+      if(!hist[h].m && owner === slot-1) owner = (slot % teams);   // don't gift me someone else's pick
+      if(rosters[owner][hp.pos].length < 20){ rosters[owner][hp.pos].push(hp); rosters[owner].all.push(hp); }
+    }
+
+    for(var pick=startPick; pick<=totalPicks; pick++){
+      var round=Math.ceil(pick/teams);
+      var t=teamAt(pick,teams);
+      var ros=rosters[t];
+      var isMine = (t === slot-1);
+
+      // record availability at my picks
+      if(isMine){
+        var mi=mineSet[pick];
+        for(var q=0;q<n;q++) if(!taken[q]) availCounts[pool[q].name][mi]++;
+      }
+
+      var chosen=-1;
+      var mustK = (rounds-round) < 1 && ros.K.length===0;
+      var mustD = (rounds-round) < 1 && ros.DEF.length===0;
+      var lastTwo = (rounds-round) <= 1;
+
+      if(!isMine){
+        // opponent: best available by simulated draft order, with light sanity rules
+        for(var k=0;k<n;k++){
+          var pi=idx[k]; if(taken[pi]) continue;
+          var pp=pool[pi];
+          if(!canTake(ros,pp.pos,round)) continue;
+          if(lastTwo && ros.K.length===0 && pp.pos!=='K' && ros.DEF.length>0) continue;
+          if(round>=13 && ros.QB.length===0 && pp.pos!=='QB') continue;
+          chosen=pi; break;
+        }
+      } else {
+        // me: randomized greedy over value-over-replacement, need-weighted
+        var cands=[];
+        for(var k2=0;k2<n;k2++){
+          var pj=idx[k2]; if(taken[pj]) continue;
+          var pq=pool[pj];
+          if(!canTake(ros,pq.pos,round)) continue;
+          if(mustK && pq.pos!=='K') continue;
+          if(mustD && !mustK && pq.pos!=='DEF') continue;
+          if(round>=13 && ros.QB.length===0 && pq.pos!=='QB') continue;
+          var vor = ep(pq) - (repl[pq.pos]||0);
+          var need;
+          if(startersOpen(ros,pq.pos)) need = 1.0;
+          else if(SIMCFG.flexPos.indexOf(pq.pos) >= 0) need = 0.45;  // real bench/flex upside
+          else need = 0.08;   // a 2nd QB/K/DEF cannot start: bye-week cover only
+          if(vor < 0) vor = vor * (1/Math.max(need,0.08));  // don't let need-weighting flatter a negative pick
+          cands.push({i:pj, v: vor*need});
+          if(cands.length>=60) break;   // deep enough; list is ADP-ordered
+        }
+        if(cands.length===0){
+          for(var k3=0;k3<n;k3++){ var pk=idx[k3]; if(!taken[pk]){ chosen=pk; break; } }
+        } else {
+          cands.sort(function(a,b){ return b.v-a.v; });
+          var top=cands.slice(0,SIMCFG.topM);
+          var mx=top[0].v, ws=[], sum=0;
+          for(var w=0;w<top.length;w++){ var e=Math.exp((top[w].v-mx)/(temp*25+1e-9)); ws.push(e); sum+=e; }
+          var r2=rnd()*sum, acc=0; chosen=top[top.length-1].i;
+          for(var w2=0;w2<top.length;w2++){ acc+=ws[w2]; if(r2<=acc){ chosen=top[w2].i; break; } }
+        }
+      }
+      if(chosen<0) continue;
+      taken[chosen]=1;
+      var cp=pool[chosen];
+      rosters[t][cp.pos].push(cp); rosters[t].all.push(cp);
+      if(isMine) myPicksThisSim.push({pick:pick, p:cp});
+    }
+
+    // my already-drafted players are part of the roster being scored
+    var res=bestLineup(rosters[slot-1], ep);
+    scores.push(res.total);
+    allSims.push({total:res.total, names:myPicksThisSim.map(function(x){return x.p.name;})});
+    myPicksThisSim.forEach(function(mp,i){
+      var key=mp.p.name; planCounts[i][key]=(planCounts[i][key]||0)+1;
+    });
+    if(!best || res.total>best.total){
+      best={ total:res.total, lineup:res.lineup,
+             picks: myPicksThisSim.map(function(x){return {pick:x.pick,name:x.p.name,pos:x.p.pos,team:x.p.team,proj:x.p.proj,rm:x.p.rm,adp:x.p.adp};}),
+             sim:s };
+    }
+  }
+
+  // --- what did the BEST drafts actually do? (top decile of outcomes) ---
+  var ranked=allSims.slice().sort(function(a,b){ return b.total-a.total; });
+  var eliteN=Math.max(1, Math.round(ranked.length*0.10));
+  var elite=ranked.slice(0,eliteN);
+  var byName={}; pool.forEach(function(p){ byName[p.name]=p; });
+  var topPlan=future.map(function(pk,i){
+    var c={};
+    elite.forEach(function(sm){ var nm=sm.names[i]; if(nm) c[nm]=(c[nm]||0)+1; });
+    var arr=Object.keys(c).map(function(nm){
+      return {name:nm, n:c[nm], pct:c[nm]/eliteN, p:byName[nm]};
+    }).sort(function(a,b){ return b.n-a.n; });
+    return {pick:pk, round:Math.ceil(pk/teams), options:arr.slice(0,4)};
+  });
+
+  scores.sort(function(a,b){return a-b;});
+  var q=function(f){ return scores[Math.min(scores.length-1,Math.floor(f*scores.length))]; };
+  return {
+    startPick: startPick, preMineCount: preMine.length,
+    remainingMyPicks: mine.filter(function(p){ return p>=startPick; }),
+    eliteN: eliteN, eliteMean: elite.reduce(function(a,b){return a+b.total;},0)/eliteN,
+    topPlan: topPlan, scores: scores,
+    sims: sims, slot: slot, myPicks: mine,
+    mean: scores.reduce(function(a,b){return a+b;},0)/scores.length,
+    p10:q(0.10), median:q(0.50), p90:q(0.90), max:scores[scores.length-1], min:scores[0],
+    best: best, planCounts: planCounts, availCounts: availCounts, repl: repl
+  };
+}
+
+
+function simFmt(x){ return (Math.round(x*10)/10).toLocaleString(); }
+function simInt(x){ return Math.round(x).toLocaleString(); }
+function esc2(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function renderSim(r, useRisk, live){
+  var ep = function(p){ return useRisk ? p.proj*p.rm : p.proj; };
+  var h = '';
+
+  // ---- what state did we simulate from? ----
+  if(r.startPick > 1){
+    h += '<div class="card" style="border-left:3px solid var(--value)">'
+       + '<h2>Resuming mid-draft</h2><p class="sub" style="margin:-4px 0 0">Replayed the '
+       + (r.startPick-1) + ' picks you recorded (' + r.preMineCount + ' of them yours), then simulated '
+       + 'from <b>pick #' + r.startPick + '</b> onward. Everything below is about your '
+       + '<b>' + r.remainingMyPicks.length + ' remaining pick' + (r.remainingMyPicks.length===1?'':'s')
+       + '</b>' + (r.remainingMyPicks.length ? ' (#' + r.remainingMyPicks.join(', #') + ')' : '') + '.</p></div>';
+  } else if(live){
+    h += '<div class="card"><p class="sub" style="margin:0">No picks recorded yet, so this is a '
+       + 'full draft from pick 1. Mark players as the draft happens and re-run to get advice '
+       + 'about only your remaining picks.</p></div>';
+  }
+
+  // ---- outcome distribution ----
+  h += '<div class="card"><h2>Outcome distribution &mdash; slot '+r.slot+'</h2>'
+     + '<p class="sub" style="margin:-4px 0 12px">Projected season points from your best legal starting '
+     + 'lineup, across '+simInt(r.sims)+' simulated drafts. Includes K and DEF, so treat it as a '
+     + 'relative yardstick, not a league-scoring prediction.</p>'
+     + '<div class="tiles">'
+     + '<div class="tile"><div class="tl">Floor (p10)</div><div class="tv">'+simInt(r.p10)+'</div></div>'
+     + '<div class="tile"><div class="tl">Median</div><div class="tv">'+simInt(r.median)+'</div></div>'
+     + '<div class="tile"><div class="tl">Mean</div><div class="tv">'+simInt(r.mean)+'</div></div>'
+     + '<div class="tile"><div class="tl">Ceiling (p90)</div><div class="tv">'+simInt(r.p90)+'</div></div>'
+     + '<div class="tile hi"><div class="tl">Best found</div><div class="tv">'+simInt(r.max)+'</div></div>'
+     + '</div>';
+
+  // histogram
+  var lo=r.min, hi=r.max, B=34, bins=new Array(B).fill(0);
+  r._scores.forEach(function(v){ var b=Math.min(B-1,Math.floor((v-lo)/((hi-lo)||1)*B)); bins[b]++; });
+  var mx=Math.max.apply(null,bins);
+  h += '<div class="hist">' + bins.map(function(b,i){
+        var isBest = (i===B-1);
+        return '<i class="'+(isBest?'me':'')+'" style="height:'+(b/mx*100)+'%"></i>';
+       }).join('') + '</div>'
+     + '<p class="sub" style="font-size:12px;margin-top:6px">'+simInt(lo)+' &larr; worst drafts'
+     + ' &nbsp;·&nbsp; best drafts &rarr; '+simInt(hi)+'</p></div>';
+
+  // ---- best roster ----
+  var best=r.best;
+  var startNames={}; best.lineup.forEach(function(l){ startNames[l.p.name]=l.slot; });
+  h += '<div class="card"><h2>Highest-scoring roster found &mdash; '+simInt(best.total)+' pts</h2>'
+     + '<p class="sub" style="margin:-4px 0 10px">The single best of '+simInt(r.sims)+' drafts. '
+     + 'This is a <b>ceiling outcome</b>, not an expectation &mdash; it required favourable breaks on who fell to you. '
+     + 'Highlighted rows are starters.</p>'
+     + '<table class="mini"><thead><tr><th>Pick</th><th>Rd</th><th>Player</th><th>Pos</th><th>Tm</th>'
+     + '<th>Proj</th><th>Adj</th><th>ADP</th><th>Slot</th></tr></thead><tbody>';
+  best.picks.forEach(function(p){
+    var slot=startNames[p.name]||'';
+    h += '<tr class="'+(slot?'slot':'')+'"><td>'+p.pick+'</td><td>'+Math.ceil(p.pick/SIMCFG.teams)+'</td>'
+       + '<td class="l"><b>'+esc2(p.name)+'</b></td>'
+       + '<td class="l"><span class="pos '+p.pos+'">'+p.pos+'</span></td>'
+       + '<td class="l tm">'+esc2(p.team)+'</td><td>'+simFmt(p.proj)+'</td>'
+       + '<td>'+(p.rm<1?'<span class="up">'+simFmt(p.proj*p.rm)+'</span>':simFmt(p.proj*p.rm))+'</td>'
+       + '<td>'+simFmt(p.adp)+'</td><td class="l">'+slot+'</td></tr>';
+  });
+  h += '</tbody></table></div>';
+
+  // ---- recommended plan ----
+  h += '<div class="card"><h2>Recommended plan'+(r.startPick>1?' &mdash; remaining picks':'')+'</h2>'
+     + '<p class="sub" style="margin:-4px 0 10px">What the top 10% of drafts ('+simInt(r.eliteN)
+     + ' of '+simInt(r.sims)+', averaging '+simInt(r.eliteMean)+' pts) actually did at each of your picks. '
+     + 'Percentages are how often that player was the choice, so a spread means the round is flexible '
+     + 'and a dominant name means it matters.</p>'
+     + '<table class="mini"><thead><tr><th>Rd</th><th>Pick</th><th>Target &rarr; fallbacks</th></tr></thead><tbody>';
+  r.topPlan.forEach(function(t){
+    var opts=t.options.map(function(o,i){
+      return '<span class="opt">'+(i===0?'<b>':'')+esc2(o.name)+(i===0?'</b>':'')
+           + ' <span class="pc">'+(o.p?o.p.pos:'')+' '+Math.round(o.pct*100)+'%</span></span>';
+    }).join('');
+    h += '<tr><td>'+t.round+'</td><td>'+t.pick+'</td><td class="l">'+(opts||'<span class="none">&mdash;</span>')+'</td></tr>';
+  });
+  h += '</tbody></table></div>';
+
+  // ---- availability ----
+  var picks=r.remainingMyPicks.slice(0,6);
+  var gone={}; (r.startPick>1 ? history : []).forEach(function(hh){ gone[hh.n]=1; });
+  var watch=POOL.filter(function(p){ return p.myRank!==null && p.myRank<=70 && !gone[p.name]; })
+                .sort(function(a,b){ return a.adp-b.adp; }).slice(0,34);
+  if(picks.length===0){
+    document.getElementById('simOut').innerHTML = h +
+      '<div class="card"><h2>Draft complete</h2><p class="sub" style="margin:0">You have recorded all '
+      + '15 of your picks, so there is nothing left to optimise.</p></div>';
+    return;
+  }
+  h += '<div class="card"><h2>Will he be there?</h2>'
+     + '<p class="sub" style="margin:-4px 0 10px">Probability each player is still undrafted when your '
+     + 'pick comes up. Use this to decide whether to reach a round early or wait.</p>'
+     + '<table class="mini"><thead><tr><th>Player</th><th>Pos</th>'
+     + picks.map(function(p){ return '<th>Pick '+p+'</th>'; }).join('') + '</tr></thead><tbody>';
+  watch.forEach(function(p){
+    var a=r.availCounts[p.name]; if(!a) return;
+    h += '<tr><td class="l"><b>'+esc2(p.name)+'</b></td>'
+       + '<td class="l"><span class="pos '+p.pos+'">'+p.pos+'</span></td>';
+    picks.forEach(function(pk,i){
+      var pct=a[i]/r.sims;
+      h += '<td><span class="pbar"><i style="width:'+(pct*100).toFixed(0)+'%"></i></span>'
+         + (pct>=0.995?'100':(pct*100).toFixed(0))+'%</td>';
+    });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>';
+
+  // ---- my current roster ----
+  if(r.preMineCount > 0){
+    var mineNames = history.filter(function(hh){return hh.m;}).map(function(hh){return hh.n;});
+    h += '<div class="card"><h2>Your roster so far</h2><table class="mini">'
+       + '<thead><tr><th>Player</th><th>Pos</th><th>Tm</th><th>Proj</th><th>Adj</th></tr></thead><tbody>';
+    mineNames.forEach(function(nm){
+      var p=POOLBY[nm];
+      if(!p){ h += '<tr><td class="l">'+esc2(nm)+'</td><td colspan="4" class="l none">not in pool</td></tr>'; return; }
+      h += '<tr><td class="l"><b>'+esc2(p.name)+'</b></td>'
+         + '<td class="l"><span class="pos '+p.pos+'">'+p.pos+'</span></td>'
+         + '<td class="l tm">'+esc2(p.team)+'</td><td>'+simFmt(p.proj)+'</td>'
+         + '<td>'+(p.rm<1?'<span class="up">'+simFmt(p.proj*p.rm)+'</span>':simFmt(p.proj*p.rm))+'</td></tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+
+  // ---- caveats ----
+  h += '<div class="card alert amber"><h2>What this model does and does not know</h2><ul>'
+     + '<li>Projections are <b>Sleeper season half-PPR totals</b>. They are one source\'s opinion, and they '
+     + 'project every player at a full slate &mdash; so the injury discount below is doing real work.</li>'
+     + '<li>The injury haircut is <b>my judgment, not data</b>: PUP/Out &times;'+ (0.62) +', '
+     + 'ACL/Achilles/surgery &times;'+ (0.86) +', other Questionable &times;'+ (0.97) +'. '
+     + 'Untick the box to see the raw, undiscounted optimum.</li>'
+     + '<li>It optimises <b>season-long starter points</b>. It does not model weekly matchups, bye-week '
+     + 'coverage, waiver adds, trades, or playoff scheduling.</li>'
+     + '<li>Opponents are ADP-driven, not strategic. Real leaguemates reach for their favourites and '
+     + 'run on positions &mdash; treat availability numbers as a guide, not a guarantee.</li>'
+     + '<li>"Best found" is the maximum over sampled drafts, so it is optimistic by construction. '
+     + 'Plan around the <b>median</b>; the ceiling shows what a lucky board looks like.</li>'
+     + '<li>When resuming mid-draft, players you marked <b>taken</b> are spread across your nine '
+     + 'opponents by snake order. Their exact owners are unknown, which slightly affects how those '
+     + 'teams draft next &mdash; it does not affect who is available to you.</li>'
+     + '</ul></div>';
+
+  document.getElementById('simOut').innerHTML = h;
+}
+
+document.getElementById('simRun').addEventListener('click', function(){
+  var btn=this, st=document.getElementById('simStatus');
+  var slot=+document.getElementById('simSlot').value;
+  var n=+document.getElementById('simN').value;
+  var useRisk=document.getElementById('simRisk').checked;
+  var live=document.getElementById('simLive').checked;
+  var state = live ? {history: history} : null;
+  btn.disabled=true; st.textContent='Simulating '+n.toLocaleString()+' drafts…';
+  document.getElementById('simOut').innerHTML='';
+  setTimeout(function(){
+    var t0=performance.now();
+    var r;
+    try {
+      r=runSim(POOL, slot, n, useRisk, 20260813+slot*7919, state);
+    } catch(e){
+      st.textContent='Simulation failed: '+e.message; btn.disabled=false; return;
+    }
+    r._scores = r.scores;
+    var ms=performance.now()-t0;
+    renderSim(r, useRisk, live);
+    st.textContent=n.toLocaleString()+' drafts in '+(ms/1000).toFixed(1)+'s';
+    btn.disabled=false;
+  }, 30);
+});
+
+const DATA = [{"rank": 1, "name": "Jahmyr Gibbs", "pos": "RB", "team": "DET", "adp": 1.5, "adpr": "1.02", "bye": 6, "n": 344, "rtg": 97, "tag": "", "note": "Consensus 1.01. Back tag is preseason noise.", "inj": "Questionable", "part": "Back", "delta": 0.5}, {"rank": 2, "name": "Bijan Robinson", "pos": "RB", "team": "ATL", "adp": 2.1, "adpr": "1.02", "bye": 11, "n": 177, "rtg": 96, "tag": "", "note": "Elite dual-threat floor.", "inj": "", "part": "", "delta": 0.1}, {"rank": 3, "name": "Ja'Marr Chase", "pos": "WR", "team": "CIN", "adp": 4.1, "adpr": "1.04", "bye": 6, "n": 332, "rtg": 95, "tag": "value", "note": "WR1 overall talent going 4th.", "inj": "", "part": "", "delta": 1.1}, {"rank": 4, "name": "Jaxon Smith-Njigba", "pos": "WR", "team": "SEA", "adp": 5.3, "adpr": "1.05", "bye": 11, "n": 144, "rtg": 93, "tag": "", "note": "True alpha in a pass-heavy offense.", "inj": "", "part": "", "delta": 1.3}, {"rank": 5, "name": "Jonathan Taylor", "pos": "RB", "team": "IND", "adp": 5.8, "adpr": "1.06", "bye": 13, "n": 275, "rtg": 91, "tag": "", "note": "Workhorse volume.", "inj": "", "part": "", "delta": 0.8}, {"rank": 6, "name": "Puka Nacua", "pos": "WR", "team": "LAR", "adp": 2.8, "adpr": "1.03", "bye": 11, "n": 38, "rtg": 90, "tag": "fade", "note": "Undisclosed injury and the market still pays a 1.03 price.", "inj": "Questionable", "part": "Undisclosed", "delta": -3.2}, {"rank": 7, "name": "Amon-Ra St. Brown", "pos": "WR", "team": "DET", "adp": 7.6, "adpr": "1.08", "bye": 6, "n": 280, "rtg": 89, "tag": "", "note": "Target monopoly, safest WR floor.", "inj": "", "part": "", "delta": 0.6}, {"rank": 8, "name": "Drake London", "pos": "WR", "team": "ATL", "adp": 9.6, "adpr": "1.10", "bye": 11, "n": 48, "rtg": 88, "tag": "value", "note": "Tua upgrade at QB; falls to 1.10.", "inj": "", "part": "", "delta": 1.6}, {"rank": 9, "name": "De'Von Achane", "pos": "RB", "team": "MIA", "adp": 11.1, "adpr": "2.01", "bye": 6, "n": 109, "rtg": 86, "tag": "value", "note": "Falls to 2.01 despite top-10 upside.", "inj": "", "part": "", "delta": 2.1}, {"rank": 10, "name": "Christian McCaffrey", "pos": "RB", "team": "SF", "adp": 6.7, "adpr": "1.07", "bye": 8, "n": 253, "rtg": 85, "tag": "fade", "note": "Age 30 plus a Questionable tag at a 1.07 price.", "inj": "Questionable", "part": "Undisclosed", "delta": -3.3}, {"rank": 11, "name": "Justin Jefferson", "pos": "WR", "team": "MIN", "adp": 15.2, "adpr": "2.05", "bye": 6, "n": 255, "rtg": 86, "tag": "value", "note": "QB uncertainty is overpriced into him. Talent hasn't moved.", "inj": "", "part": "", "delta": 4.2}, {"rank": 12, "name": "James Cook III", "pos": "RB", "team": "BUF", "adp": 11.7, "adpr": "2.02", "bye": 7, "n": 431, "rtg": 84, "tag": "", "note": "Efficient, secure role.", "inj": "", "part": "", "delta": -0.3}, {"rank": 13, "name": "CeeDee Lamb", "pos": "WR", "team": "DAL", "adp": 12.6, "adpr": "2.03", "bye": 14, "n": 223, "rtg": 84, "tag": "", "note": "Pickens presence caps target share slightly.", "inj": "", "part": "", "delta": -0.4}, {"rank": 14, "name": "Ashton Jeanty", "pos": "RB", "team": "LV", "adp": 14.8, "adpr": "2.05", "bye": 13, "n": 255, "rtg": 84, "tag": "", "note": "Full workload, weak offense.", "inj": "", "part": "", "delta": 0.8}, {"rank": 15, "name": "Chase Brown", "pos": "RB", "team": "CIN", "adp": 16.0, "adpr": "2.06", "bye": 6, "n": 287, "rtg": 82, "tag": "", "note": "Every-down back in an elite offense.", "inj": "", "part": "", "delta": 1.0}, {"rank": 16, "name": "Derrick Henry", "pos": "RB", "team": "BAL", "adp": 10.0, "adpr": "1.10", "bye": 13, "n": 106, "rtg": 82, "tag": "fade", "note": "Age 32 at a 1.10 price. The cliff risk isn't priced in.", "inj": "", "part": "", "delta": -6.0}, {"rank": 17, "name": "Rashee Rice", "pos": "WR", "team": "KC", "adp": 12.8, "adpr": "2.03", "bye": 5, "n": 36, "rtg": 81, "tag": "fade", "note": "Mahomes ACL caps the ceiling.", "inj": "", "part": "", "delta": -4.2}, {"rank": 18, "name": "Saquon Barkley", "pos": "RB", "team": "PHI", "adp": 18.2, "adpr": "2.08", "bye": 10, "n": 464, "rtg": 81, "tag": "", "note": "Age 29 but elite line.", "inj": "", "part": "", "delta": 0.2}, {"rank": 19, "name": "Omarion Hampton", "pos": "RB", "team": "LAC", "adp": 21.9, "adpr": "3.02", "bye": 7, "n": 487, "rtg": 81, "tag": "", "note": "Lead role, second year.", "inj": "", "part": "", "delta": 2.9}, {"rank": 20, "name": "Nico Collins", "pos": "WR", "team": "HOU", "adp": 23.3, "adpr": "3.03", "bye": 8, "n": 169, "rtg": 79, "tag": "", "note": "Houston QB room unsettled (Stroud ADP 170).", "inj": "", "part": "", "delta": 3.3}, {"rank": 21, "name": "Josh Allen", "pos": "QB", "team": "BUF", "adp": 24.8, "adpr": "3.05", "bye": 7, "n": 173, "rtg": 80, "tag": "", "note": "QB1 by talent, but see the QB strategy note.", "inj": "", "part": "", "delta": 3.8}, {"rank": 22, "name": "A.J. Brown", "pos": "WR", "team": "NE", "adp": 19.0, "adpr": "2.09", "bye": 11, "n": 141, "rtg": 79, "tag": "", "note": "New team. Maye is the market's QB1.", "inj": "", "part": "", "delta": -3.0}, {"rank": 23, "name": "Jeremiyah Love", "pos": "RB", "team": "ARI", "adp": 29.3, "adpr": "3.09", "bye": 14, "n": 93, "rtg": 78, "tag": "value", "note": "Rookie; Conner's foot injury opens the job.", "inj": "", "part": "", "delta": 6.3}, {"rank": 24, "name": "Kenneth Walker", "pos": "RB", "team": "KC", "adp": 26.4, "adpr": "3.06", "bye": 5, "n": 509, "rtg": 78, "tag": "", "note": "New KC role; Mahomes injury tempers the offense.", "inj": "", "part": "", "delta": 2.4}, {"rank": 25, "name": "George Pickens", "pos": "WR", "team": "DAL", "adp": 19.5, "adpr": "2.10", "bye": 14, "n": 68, "rtg": 78, "tag": "", "note": "Legit WR1 volume in Dallas.", "inj": "", "part": "", "delta": -5.5}, {"rank": 26, "name": "Josh Jacobs", "pos": "RB", "team": "GB", "adp": 23.0, "adpr": "3.03", "bye": 11, "n": 94, "rtg": 78, "tag": "", "note": "Groin tag. Monitor.", "inj": "Questionable", "part": "Groin", "delta": -3.0}, {"rank": 27, "name": "Zay Flowers", "pos": "WR", "team": "BAL", "adp": 25.2, "adpr": "3.05", "bye": 13, "n": 66, "rtg": 77, "tag": "", "note": "Quad bruise. Minor.", "inj": "", "part": "", "delta": -1.8}, {"rank": 28, "name": "Breece Hall", "pos": "RB", "team": "NYJ", "adp": 27.2, "adpr": "3.07", "bye": 13, "n": 62, "rtg": 76, "tag": "", "note": "Finally a clean role.", "inj": "", "part": "", "delta": -0.8}, {"rank": 29, "name": "Chris Olave", "pos": "WR", "team": "NO", "adp": 23.3, "adpr": "3.03", "bye": 8, "n": 88, "rtg": 74, "tag": "fade", "note": "Shough at QB is a real downgrade.", "inj": "", "part": "", "delta": -5.7}, {"rank": 30, "name": "Malik Nabers", "pos": "WR", "team": "NYG", "adp": 30.3, "adpr": "3.10", "bye": 8, "n": 298, "rtg": 74, "tag": "", "note": "ACL recovery. Elite talent, real risk.", "inj": "Questionable", "part": "Knee - ACL", "delta": 0.3}, {"rank": 31, "name": "Tee Higgins", "pos": "WR", "team": "CIN", "adp": 38.0, "adpr": "4.08", "bye": 6, "n": 150, "rtg": 74, "tag": "value", "note": "WR2 production at a Round 4 price.", "inj": "", "part": "", "delta": 7.0}, {"rank": 32, "name": "Garrett Wilson", "pos": "WR", "team": "NYJ", "adp": 30.9, "adpr": "4.01", "bye": 13, "n": 59, "rtg": 74, "tag": "", "note": "Volume is safe.", "inj": "", "part": "", "delta": -1.1}, {"rank": 33, "name": "Kyren Williams", "pos": "RB", "team": "LAR", "adp": 31.1, "adpr": "4.01", "bye": 11, "n": 207, "rtg": 74, "tag": "", "note": "TD-dependent but heavy usage.", "inj": "", "part": "", "delta": -1.9}, {"rank": 34, "name": "Emeka Egbuka", "pos": "WR", "team": "TB", "adp": 32.5, "adpr": "4.03", "bye": 10, "n": 281, "rtg": 74, "tag": "", "note": "Undisclosed tag; second-year leap candidate.", "inj": "Questionable", "part": "Undisclosed", "delta": -1.5}, {"rank": 35, "name": "Bucky Irving", "pos": "RB", "team": "TB", "adp": 45.7, "adpr": "5.06", "bye": 10, "n": 115, "rtg": 73, "tag": "value", "note": "Biggest RB discount in the top 50.", "inj": "", "part": "", "delta": 10.7}, {"rank": 36, "name": "Tetairoa McMillan", "pos": "WR", "team": "CAR", "adp": 36.2, "adpr": "4.06", "bye": 5, "n": 149, "rtg": 73, "tag": "", "note": "Alpha target in Carolina.", "inj": "", "part": "", "delta": 0.2}, {"rank": 37, "name": "Cam Skattebo", "pos": "RB", "team": "NYG", "adp": 34.3, "adpr": "4.04", "bye": 8, "n": 121, "rtg": 72, "tag": "", "note": "Bruising role, TD equity.", "inj": "", "part": "", "delta": -2.7}, {"rank": 38, "name": "DeVonta Smith", "pos": "WR", "team": "PHI", "adp": 31.3, "adpr": "4.01", "bye": 10, "n": 225, "rtg": 72, "tag": "", "note": "Hamstring. Monitor closely.", "inj": "Questionable", "part": "Hamstring", "delta": -6.7}, {"rank": 39, "name": "Quinshon Judkins", "pos": "RB", "team": "CLE", "adp": 49.0, "adpr": "5.09", "bye": 11, "n": 203, "rtg": 71, "tag": "value", "note": "Lead Cleveland back at a R5 price.", "inj": "", "part": "", "delta": 10.0}, {"rank": 40, "name": "TreVeyon Henderson", "pos": "RB", "team": "NE", "adp": 57.3, "adpr": "6.07", "bye": 11, "n": 157, "rtg": 71, "tag": "value", "note": "Best RB value on the board at ADP 57.", "inj": "", "part": "", "delta": 17.3}, {"rank": 41, "name": "Trey McBride", "pos": "TE", "team": "ARI", "adp": 44.0, "adpr": "5.04", "bye": 14, "n": 296, "rtg": 80, "tag": "value", "note": "TE1. Healthy. Round 5 price for a positional cheat code.", "inj": "", "part": "", "delta": 3.0}, {"rank": 42, "name": "Brock Bowers", "pos": "TE", "team": "LV", "adp": 44.8, "adpr": "5.05", "bye": 13, "n": 511, "rtg": 80, "tag": "value", "note": "No injury tag. Elite TE at half last year's cost.", "inj": "", "part": "", "delta": 2.8}, {"rank": 43, "name": "Ladd McConkey", "pos": "WR", "team": "LAC", "adp": 44.9, "adpr": "5.05", "bye": 7, "n": 404, "rtg": 74, "tag": "value", "note": "Target hog, fell two rounds.", "inj": "", "part": "", "delta": 1.9}, {"rank": 44, "name": "Lamar Jackson", "pos": "QB", "team": "BAL", "adp": 50.9, "adpr": "6.01", "bye": 13, "n": 118, "rtg": 78, "tag": "value", "note": "Best QB price inside the top 60.", "inj": "", "part": "", "delta": 6.9}, {"rank": 45, "name": "Drake Maye", "pos": "QB", "team": "NE", "adp": 46.2, "adpr": "5.06", "bye": 11, "n": 80, "rtg": 74, "tag": "", "note": "Market QB1. Rushing floor.", "inj": "", "part": "", "delta": 1.2}, {"rank": 46, "name": "Javonte Williams", "pos": "RB", "team": "DAL", "adp": 36.0, "adpr": "4.06", "bye": 14, "n": 256, "rtg": 70, "tag": "fade", "note": "Committee risk in Dallas.", "inj": "", "part": "", "delta": -10.0}, {"rank": 47, "name": "Rome Odunze", "pos": "WR", "team": "CHI", "adp": 44.8, "adpr": "5.05", "bye": 10, "n": 124, "rtg": 69, "tag": "", "note": "Chicago passing volume.", "inj": "", "part": "", "delta": -2.2}, {"rank": 48, "name": "Davante Adams", "pos": "WR", "team": "LAR", "adp": 39.3, "adpr": "4.09", "bye": 11, "n": 128, "rtg": 69, "tag": "fade", "note": "Age-related decline risk.", "inj": "", "part": "", "delta": -8.7}, {"rank": 49, "name": "Terry McLaurin", "pos": "WR", "team": "WAS", "adp": 42.9, "adpr": "5.03", "bye": 7, "n": 149, "rtg": 68, "tag": "", "note": "Diggs arrival costs targets.", "inj": "", "part": "", "delta": -6.1}, {"rank": 50, "name": "DJ Moore", "pos": "WR", "team": "BUF", "adp": 48.7, "adpr": "5.09", "bye": 7, "n": 246, "rtg": 68, "tag": "", "note": "New offense, Allen upgrade.", "inj": "", "part": "", "delta": -1.3}, {"rank": 51, "name": "Joe Burrow", "pos": "QB", "team": "CIN", "adp": 57.6, "adpr": "6.08", "bye": 6, "n": 105, "rtg": 73, "tag": "value", "note": "Elite passing offense at a R6 QB price.", "inj": "", "part": "", "delta": 6.6}, {"rank": 52, "name": "Travis Etienne Jr.", "pos": "RB", "team": "NO", "adp": 41.2, "adpr": "5.01", "bye": 8, "n": 111, "rtg": 67, "tag": "", "note": "New Orleans backfield lead.", "inj": "", "part": "", "delta": -10.8}, {"rank": 53, "name": "Jaylen Waddle", "pos": "WR", "team": "DEN", "adp": 51.0, "adpr": "6.01", "bye": 10, "n": 285, "rtg": 65, "tag": "", "note": "Denver move; undisclosed tag.", "inj": "Questionable", "part": "Undisclosed", "delta": -2.0}, {"rank": 54, "name": "Luther Burden III", "pos": "WR", "team": "CHI", "adp": 55.6, "adpr": "6.06", "bye": 10, "n": 224, "rtg": 65, "tag": "", "note": "Lower-body tag. Upside pick.", "inj": "Questionable", "part": "Lower Body", "delta": 1.6}, {"rank": 55, "name": "Marvin Harrison Jr.", "pos": "WR", "team": "ARI", "adp": 62.3, "adpr": "7.02", "bye": 14, "n": 146, "rtg": 65, "tag": "", "note": "Talent still ahead of production.", "inj": "", "part": "", "delta": 7.3}, {"rank": 56, "name": "Bhayshul Tuten", "pos": "RB", "team": "JAX", "adp": 52.0, "adpr": "6.02", "bye": 7, "n": 197, "rtg": 65, "tag": "", "note": "Explosive, unclear share.", "inj": "", "part": "", "delta": -4.0}, {"rank": 57, "name": "D'Andre Swift", "pos": "RB", "team": "CHI", "adp": 42.9, "adpr": "5.03", "bye": 10, "n": 110, "rtg": 64, "tag": "fade", "note": "Monangai threatens the workload.", "inj": "", "part": "", "delta": -14.1}, {"rank": 58, "name": "Courtland Sutton", "pos": "WR", "team": "DEN", "adp": 55.7, "adpr": "6.06", "bye": 10, "n": 71, "rtg": 64, "tag": "", "note": "Reliable red-zone role.", "inj": "", "part": "", "delta": -2.3}, {"rank": 59, "name": "Brian Thomas Jr.", "pos": "WR", "team": "JAX", "adp": 69.5, "adpr": "7.09", "bye": 7, "n": 282, "rtg": 64, "tag": "value", "note": "Bounce-back candidate at ADP 70.", "inj": "", "part": "", "delta": 10.5}, {"rank": 60, "name": "Christian Watson", "pos": "WR", "team": "GB", "adp": 62.9, "adpr": "7.03", "bye": 11, "n": 387, "rtg": 64, "tag": "", "note": "Big-play WR1 role in GB.", "inj": "", "part": "", "delta": 2.9}, {"rank": 61, "name": "Jayden Daniels", "pos": "QB", "team": "WAS", "adp": 71.7, "adpr": "8.02", "bye": 7, "n": 66, "rtg": 72, "tag": "value", "note": "Huge fall, no injury tag. Rushing floor is elite.", "inj": "", "part": "", "delta": 10.7}, {"rank": 62, "name": "Jalen Hurts", "pos": "QB", "team": "PHI", "adp": 74.9, "adpr": "8.05", "bye": 10, "n": 131, "rtg": 71, "tag": "value", "note": "Konami-code QB at a Round 8 price.", "inj": "", "part": "", "delta": 12.9}, {"rank": 63, "name": "Tyler Warren", "pos": "TE", "team": "IND", "adp": 71.4, "adpr": "8.01", "bye": 13, "n": 213, "rtg": 68, "tag": "value", "note": "TE3 upside at a Round 8 tag.", "inj": "", "part": "", "delta": 8.4}, {"rank": 64, "name": "Colston Loveland", "pos": "TE", "team": "CHI", "adp": 66.1, "adpr": "7.06", "bye": 10, "n": 199, "rtg": 65, "tag": "", "note": "Second-year TE leap.", "inj": "", "part": "", "delta": 2.1}, {"rank": 65, "name": "DK Metcalf", "pos": "WR", "team": "PIT", "adp": 62.3, "adpr": "7.02", "bye": 9, "n": 148, "rtg": 63, "tag": "", "note": "Undisclosed tag; TD-dependent.", "inj": "Questionable", "part": "Undisclosed", "delta": -2.7}, {"rank": 66, "name": "Jadarian Price", "pos": "RB", "team": "SEA", "adp": 66.7, "adpr": "7.07", "bye": 11, "n": 265, "rtg": 62, "tag": "", "note": "Rookie with soreness; watch the Seattle split.", "inj": "Questionable", "part": "Lower Body", "delta": 0.7}, {"rank": 67, "name": "David Montgomery", "pos": "RB", "team": "HOU", "adp": 62.9, "adpr": "7.03", "bye": 8, "n": 312, "rtg": 62, "tag": "", "note": "TD equity, limited receiving.", "inj": "", "part": "", "delta": -4.1}, {"rank": 68, "name": "Carnell Tate", "pos": "WR", "team": "TEN", "adp": 75.1, "adpr": "8.05", "bye": 9, "n": 213, "rtg": 61, "tag": "", "note": "Rookie, immediate target share.", "inj": "", "part": "", "delta": 7.1}, {"rank": 69, "name": "Mike Evans", "pos": "WR", "team": "SF", "adp": 56.8, "adpr": "6.07", "bye": 8, "n": 184, "rtg": 60, "tag": "fade", "note": "Age plus a quad injury. Market too high at 57.", "inj": "Questionable", "part": "Quadriceps", "delta": -12.2}, {"rank": 70, "name": "Rico Dowdle", "pos": "RB", "team": "PIT", "adp": 67.2, "adpr": "7.07", "bye": 9, "n": 46, "rtg": 60, "tag": "", "note": "Committee with Warren.", "inj": "", "part": "", "delta": -2.8}, {"rank": 71, "name": "Sam LaPorta", "pos": "TE", "team": "DET", "adp": 92.6, "adpr": "10.03", "bye": 6, "n": 119, "rtg": 60, "tag": "value", "note": "Startable TE with a Round 10 tag.", "inj": "", "part": "", "delta": 21.6}, {"rank": 72, "name": "Jordyn Tyson", "pos": "WR", "team": "NO", "adp": 85.3, "adpr": "9.05", "bye": 8, "n": 170, "rtg": 60, "tag": "", "note": "Rookie in a needy WR room.", "inj": "Questionable", "part": "Hamstring", "delta": 13.3}, {"rank": 73, "name": "Tony Pollard", "pos": "RB", "team": "TEN", "adp": 66.8, "adpr": "7.07", "bye": 9, "n": 64, "rtg": 59, "tag": "", "note": "Volume without efficiency.", "inj": "", "part": "", "delta": -6.2}, {"rank": 74, "name": "Rhamondre Stevenson", "pos": "RB", "team": "NE", "adp": 72.0, "adpr": "8.02", "bye": 11, "n": 94, "rtg": 58, "tag": "", "note": "Henderson takes the upside.", "inj": "", "part": "", "delta": -2.0}, {"rank": 75, "name": "Jaylen Warren", "pos": "RB", "team": "PIT", "adp": 76.7, "adpr": "8.07", "bye": 9, "n": 67, "rtg": 58, "tag": "", "note": "Pass-game role.", "inj": "", "part": "", "delta": 1.7}, {"rank": 76, "name": "Chuba Hubbard", "pos": "RB", "team": "CAR", "adp": 76.8, "adpr": "8.07", "bye": 5, "n": 83, "rtg": 58, "tag": "", "note": "Safe touches, poor offense.", "inj": "Questionable", "part": "Hamstring", "delta": 0.8}, {"rank": 77, "name": "Parker Washington", "pos": "WR", "team": "JAX", "adp": 68.0, "adpr": "7.08", "bye": 7, "n": 277, "rtg": 57, "tag": "", "note": "Cheap Jacksonville volume.", "inj": "", "part": "", "delta": -9.0}, {"rank": 78, "name": "Jakobi Meyers", "pos": "WR", "team": "JAX", "adp": 79.2, "adpr": "8.09", "bye": 7, "n": 69, "rtg": 57, "tag": "", "note": "Steady, low ceiling.", "inj": "", "part": "", "delta": 1.2}, {"rank": 79, "name": "Dak Prescott", "pos": "QB", "team": "DAL", "adp": 67.3, "adpr": "7.07", "bye": 14, "n": 67, "rtg": 57, "tag": "", "note": "Fine QB2 / bye-week cover.", "inj": "", "part": "", "delta": -11.7}, {"rank": 80, "name": "Alec Pierce", "pos": "WR", "team": "IND", "adp": 50.3, "adpr": "5.10", "bye": 13, "n": 34, "rtg": 48, "tag": "hardfade", "note": "ON PUP, ankle surgery. Market has NOT adjusted. Do not draft at 50.", "inj": "PUP", "part": "Ankle", "delta": -29.7}, {"rank": 81, "name": "J.K. Dobbins", "pos": "RB", "team": "DEN", "adp": 86.4, "adpr": "9.06", "bye": 10, "n": 168, "rtg": 56, "tag": "", "note": "Denver committee.", "inj": "Questionable", "part": "Undisclosed", "delta": 5.4}, {"rank": 82, "name": "RJ Harvey", "pos": "RB", "team": "DEN", "adp": 88.4, "adpr": "9.08", "bye": 10, "n": 105, "rtg": 56, "tag": "", "note": "Upside half of the Denver backfield.", "inj": "", "part": "", "delta": 6.4}, {"rank": 83, "name": "Michael Pittman Jr.", "pos": "WR", "team": "PIT", "adp": 80.5, "adpr": "9.01", "bye": 9, "n": 155, "rtg": 56, "tag": "", "note": "Leg injury; new team.", "inj": "Questionable", "part": "Leg", "delta": -2.5}, {"rank": 84, "name": "Kyle Pitts Sr.", "pos": "TE", "team": "ATL", "adp": 82.4, "adpr": "9.02", "bye": 11, "n": 48, "rtg": 56, "tag": "", "note": "Perennial tease, cheap now.", "inj": "", "part": "", "delta": -1.6}, {"rank": 85, "name": "Wan'Dale Robinson", "pos": "WR", "team": "TEN", "adp": 80.9, "adpr": "9.01", "bye": 9, "n": 90, "rtg": 55, "tag": "", "note": "PPR-ish floor, low ceiling.", "inj": "", "part": "", "delta": -4.1}, {"rank": 86, "name": "Quentin Johnston", "pos": "WR", "team": "LAC", "adp": 81.6, "adpr": "9.02", "bye": 7, "n": 167, "rtg": 55, "tag": "", "note": "Red-zone role.", "inj": "", "part": "", "delta": -4.4}, {"rank": 87, "name": "Harold Fannin Jr.", "pos": "TE", "team": "CLE", "adp": 84.6, "adpr": "9.05", "bye": 11, "n": 50, "rtg": 55, "tag": "", "note": "Cheap TE with real usage.", "inj": "", "part": "", "delta": -2.4}, {"rank": 88, "name": "Michael Wilson", "pos": "WR", "team": "ARI", "adp": 84.9, "adpr": "9.05", "bye": 14, "n": 206, "rtg": 54, "tag": "", "note": "ARI volume if MHJ disappoints.", "inj": "", "part": "", "delta": -3.1}, {"rank": 89, "name": "Aaron Jones Sr.", "pos": "RB", "team": "MIN", "adp": 96.5, "adpr": "10.07", "bye": 6, "n": 85, "rtg": 54, "tag": "", "note": "Split with Mason.", "inj": "", "part": "", "delta": 7.5}, {"rank": 90, "name": "Chris Godwin Jr.", "pos": "WR", "team": "TB", "adp": 90.1, "adpr": "9.10", "bye": 10, "n": 147, "rtg": 54, "tag": "", "note": "Post-injury, cheap.", "inj": "", "part": "", "delta": 0.1}, {"rank": 91, "name": "Deebo Samuel Sr.", "pos": "WR", "team": "SF", "adp": 90.3, "adpr": "9.10", "bye": 8, "n": 102, "rtg": 54, "tag": "", "note": "Usage-dependent.", "inj": "", "part": "", "delta": -0.7}, {"rank": 92, "name": "Jayden Reed", "pos": "WR", "team": "GB", "adp": 90.5, "adpr": "9.10", "bye": 11, "n": 86, "rtg": 54, "tag": "", "note": "Crowded GB room.", "inj": "", "part": "", "delta": -1.5}, {"rank": 93, "name": "Stefon Diggs", "pos": "WR", "team": "WAS", "adp": 93.3, "adpr": "10.03", "bye": 7, "n": 153, "rtg": 53, "tag": "", "note": "New team, age.", "inj": "", "part": "", "delta": 0.3}, {"rank": 94, "name": "Jordan Addison", "pos": "WR", "team": "MIN", "adp": 91.2, "adpr": "10.01", "bye": 6, "n": 90, "rtg": 53, "tag": "", "note": "Thumb; MIN QB murk.", "inj": "Questionable", "part": "Thumb", "delta": -2.8}, {"rank": 95, "name": "Kenny Gainwell", "pos": "RB", "team": "TB", "adp": 98.1, "adpr": "10.08", "bye": 10, "n": 139, "rtg": 53, "tag": "", "note": "Pass-catching role in TB.", "inj": "", "part": "", "delta": 3.1}, {"rank": 96, "name": "Josh Downs", "pos": "WR", "team": "IND", "adp": 97.3, "adpr": "10.07", "bye": 13, "n": 192, "rtg": 52, "tag": "", "note": "Groin; slot volume.", "inj": "Questionable", "part": "Groin", "delta": 1.3}, {"rank": 97, "name": "Brock Purdy", "pos": "QB", "team": "SF", "adp": 75.5, "adpr": "8.06", "bye": 8, "n": 31, "rtg": 56, "tag": "", "note": "Solid QB2.", "inj": "", "part": "", "delta": -21.5}, {"rank": 98, "name": "Matthew Stafford", "pos": "QB", "team": "LAR", "adp": 77.2, "adpr": "8.07", "bye": 11, "n": 91, "rtg": 55, "tag": "", "note": "TD upside, age risk.", "inj": "", "part": "", "delta": -20.8}, {"rank": 99, "name": "Trevor Lawrence", "pos": "QB", "team": "JAX", "adp": 88.7, "adpr": "9.09", "bye": 7, "n": 220, "rtg": 55, "tag": "", "note": "Streamable.", "inj": "", "part": "", "delta": -10.3}, {"rank": 100, "name": "Kyle Monangai", "pos": "RB", "team": "CHI", "adp": 102.6, "adpr": "11.03", "bye": 10, "n": 179, "rtg": 52, "tag": "", "note": "Handcuff with standalone value.", "inj": "", "part": "", "delta": 2.6}, {"rank": 101, "name": "Xavier Worthy", "pos": "WR", "team": "KC", "adp": 101.1, "adpr": "11.01", "bye": 5, "n": 117, "rtg": 52, "tag": "", "note": "Shoulder; Mahomes injury hurts.", "inj": "Questionable", "part": "Shoulder", "delta": 0.1}, {"rank": 102, "name": "Makai Lemon", "pos": "WR", "team": "PHI", "adp": 102.0, "adpr": "11.02", "bye": 10, "n": 138, "rtg": 52, "tag": "", "note": "Rookie, PHI target competition.", "inj": "Questionable", "part": "Undisclosed", "delta": 0.0}, {"rank": 103, "name": "Khalil Shakir", "pos": "WR", "team": "BUF", "adp": 103.2, "adpr": "11.03", "bye": 7, "n": 45, "rtg": 52, "tag": "", "note": "Safe slot, low ceiling.", "inj": "", "part": "", "delta": 0.2}, {"rank": 104, "name": "Jaxson Dart", "pos": "QB", "team": "NYG", "adp": 98.6, "adpr": "10.09", "bye": 8, "n": 141, "rtg": 52, "tag": "", "note": "Rushing upside as a QB2.", "inj": "", "part": "", "delta": -5.4}, {"rank": 105, "name": "Patrick Mahomes", "pos": "QB", "team": "KC", "adp": 99.2, "adpr": "10.09", "bye": 5, "n": 154, "rtg": 52, "tag": "", "note": "ACL surgery. QB2 stash ONLY at this price.", "inj": "Questionable", "part": "Knee - ACL", "delta": -5.8}, {"rank": 106, "name": "Rachaad White", "pos": "RB", "team": "WAS", "adp": 107.0, "adpr": "11.07", "bye": 7, "n": 112, "rtg": 51, "tag": "", "note": "Change-of-pace.", "inj": "", "part": "", "delta": 1.0}, {"rank": 107, "name": "Jacory Croskey-Merritt", "pos": "RB", "team": "WAS", "adp": 109.5, "adpr": "11.09", "bye": 7, "n": 151, "rtg": 50, "tag": "", "note": "Washington backfield lottery ticket.", "inj": "", "part": "", "delta": 2.5}, {"rank": 108, "name": "Justin Herbert", "pos": "QB", "team": "LAC", "adp": 103.9, "adpr": "11.04", "bye": 7, "n": 288, "rtg": 51, "tag": "", "note": "Volume passer, low rushing.", "inj": "", "part": "", "delta": -4.1}, {"rank": 109, "name": "Caleb Williams", "pos": "QB", "team": "CHI", "adp": 103.9, "adpr": "11.04", "bye": 10, "n": 250, "rtg": 51, "tag": "", "note": "Upside QB2.", "inj": "", "part": "", "delta": -5.1}, {"rank": 110, "name": "Dallas Goedert", "pos": "TE", "team": "PHI", "adp": 107.4, "adpr": "11.07", "bye": 10, "n": 20, "rtg": 50, "tag": "", "note": "TE floor, minimal ceiling.", "inj": "", "part": "", "delta": -2.6}, {"rank": 111, "name": "Jared Goff", "pos": "QB", "team": "DET", "adp": 108.8, "adpr": "11.09", "bye": 6, "n": 114, "rtg": 50, "tag": "", "note": "Great offense, no legs.", "inj": "", "part": "", "delta": -2.2}, {"rank": 112, "name": "Jordan Mason", "pos": "RB", "team": "MIN", "adp": 117.4, "adpr": "12.07", "bye": 6, "n": 236, "rtg": 50, "tag": "", "note": "Handcuff to Aaron Jones.", "inj": "", "part": "", "delta": 5.4}, {"rank": 113, "name": "Blake Corum", "pos": "RB", "team": "LAR", "adp": 119.8, "adpr": "12.10", "bye": 11, "n": 255, "rtg": 49, "tag": "", "note": "Handcuff to Kyren.", "inj": "", "part": "", "delta": 6.8}, {"rank": 114, "name": "Matthew Golden", "pos": "WR", "team": "GB", "adp": 115.9, "adpr": "12.06", "bye": 11, "n": 141, "rtg": 49, "tag": "", "note": "Crowded room.", "inj": "", "part": "", "delta": 1.9}, {"rank": 115, "name": "Rashid Shaheed", "pos": "WR", "team": "SEA", "adp": 117.0, "adpr": "12.07", "bye": 11, "n": 52, "rtg": 49, "tag": "", "note": "Big-play only.", "inj": "", "part": "", "delta": 2.0}, {"rank": 116, "name": "Jonathon Brooks", "pos": "RB", "team": "CAR", "adp": 112.1, "adpr": "12.02", "bye": 5, "n": 431, "rtg": 49, "tag": "", "note": "Post-injury upside stash.", "inj": "", "part": "", "delta": -3.9}, {"rank": 117, "name": "Ricky Pearsall", "pos": "WR", "team": "SF", "adp": 111.5, "adpr": "12.02", "bye": 8, "n": 18, "rtg": 48, "tag": "", "note": "SF room is thin \u2014 watch this one.", "inj": "IR", "part": "Knee - PCL", "delta": -5.5}, {"rank": 118, "name": "Travis Kelce", "pos": "TE", "team": "KC", "adp": 128.1, "adpr": "13.08", "bye": 5, "n": 64, "rtg": 47, "tag": "value", "note": "Round 13 price for a name that could still be TE12. Free roll.", "inj": "", "part": "", "delta": 10.1}, {"rank": 119, "name": "Tucker Kraft", "pos": "TE", "team": "GB", "adp": 102.1, "adpr": "11.02", "bye": 11, "n": 134, "rtg": 42, "tag": "fade", "note": "ACL surgery. Not worth ADP 102.", "inj": "Questionable", "part": "Knee - ACL", "delta": -16.9}, {"rank": 120, "name": "George Kittle", "pos": "TE", "team": "SF", "adp": 116.0, "adpr": "12.06", "bye": 8, "n": 86, "rtg": 40, "tag": "fade", "note": "PUP, Achilles surgery. Not worth ADP 116.", "inj": "PUP", "part": "Achilles", "delta": -4.0}];
+const KEY = 'ffdraft2026.history';
+const OLDKEY = 'ffdraft2026.drafted';
+
+const ROUND_BRIEF = {
+  ALL: ['Full board','All 120 ranked players, grouped by round. Sort any column, or jump to a specific round with the tabs above.'],
+  1: ['Round 1 · picks 1–10','Take the anchor, no reaches. <b>Gibbs</b> and <b>Bijan</b> are the consensus 1.01/1.02. <b>Chase at ADP 4.1</b> is the best value in the round. Fade <b>Nacua</b> at a 1.03 price with an undisclosed injury, and be wary of <b>McCaffrey</b> at 6.7 given age 30 plus a Questionable tag.'],
+  2: ['Round 2 · picks 11–20','<b>Jefferson at 15.2 is the steal of the draft</b> — the market is overpricing Minnesota QB uncertainty into a generational talent. <b>Achane</b> often falls to 2.01. Avoid <b>Derrick Henry at 10.0</b> (age 32) and temper <b>Rashee Rice</b> — the Mahomes ACL caps that offense.'],
+  3: ['Round 3 · picks 21–30','Where the RB cliff starts to bite. <b>Jeremiyah Love at 29.3</b> is the rookie value — Conner’s foot injury opens the job. <b>Josh Allen at 24.8</b> is the first QB off the board, but you should pass; see the QB note below. Fade <b>Olave</b> with Shough at QB.'],
+  4: ['Round 4 · picks 31–40','Best value round on the board. <b>TreVeyon Henderson (57.3)</b>, <b>Bucky Irving (45.7)</b>, <b>Quinshon Judkins (49.0)</b>, and <b>Tee Higgins (38.0)</b> are all discounted relative to their roles. If you need RB, this is the round to attack.'],
+  5: ['Round 5 · picks 41–50','<b>The elite-TE window.</b> Both <b>McBride (44.0)</b> and <b>Bowers (44.8)</b> are healthy at a Round 5 price — a real discount to their talent. Take one and never think about TE again. <b>Lamar at 50.9</b> is the best QB price inside the top 60.'],
+  6: ['Round 6 · picks 51–60','Upside round. <b>Burrow at 57.6</b> is an elite passing offense at a bargain QB price. <b>Brian Thomas Jr. at 69.5</b> is a bounce-back bet. Fade <b>Mike Evans (56.8)</b> — age plus a quad — and <b>Swift (42.9)</b>, whose workload is threatened.'],
+  7: ['Round 7 · picks 61–70','<b>The QB payoff round.</b> <b>Jayden Daniels (71.7)</b> and <b>Jalen Hurts (74.9)</b> are healthy with top-five upside. Taking one here instead of Allen in Round 3 is the single biggest structural edge in this format. <b>Tyler Warren (71.4)</b> is the TE fallback if you missed Round 5.'],
+  8: ['Round 8 · picks 71–80','Depth and floor. <b>Sam LaPorta at 92.6</b> is a startable TE with a Round 10 tag. <b>⚠️ Hard avoid: Alec Pierce.</b> He is on PUP after ankle surgery and the market still drafts him at 50.3 — the clearest mistake on the public board.'],
+  9: ['Round 9 · picks 81–90','Bench builders and injury-discount bets. <b>Kyle Pitts (82.4)</b> and <b>Harold Fannin (84.6)</b> are cheap TE swings. <b>Godwin</b>, <b>Deebo</b>, and <b>Pittman</b> are all volume-dependent — take the one whose offense you believe in.'],
+  10: ['Round 10 · picks 91–100','QB2 and handcuff territory. <b>Purdy (75.5)</b>, <b>Stafford (77.2)</b>, and <b>Lawrence (88.7)</b> are all fine bye-week covers if you took Daniels or Hurts. Do not spend here on Denver (91) or Seattle (99) defense.'],
+  11: ['Round 11 · picks 101–110','<b>Mahomes at 99.2</b> belongs here as a QB2 stash, not as your starter — ACL surgery. <b>Kyle Monangai (102.6)</b> is a handcuff with standalone value. Rookie <b>Makai Lemon</b> is a cheap lottery ticket.'],
+  12: ['Round 12+ · picks 111–120','Last real picks. Two RB handcuffs (<b>Mason</b>, <b>Corum</b>) and <b>Travis Kelce at 128</b> as a free-roll TE2. <b>Avoid Kraft (102, ACL)</b> and <b>Kittle (116, PUP Achilles)</b> at cost. Then kicker in Round 14 (<b>Aubrey</b>) and a streamable defense in Round 15.']
+};
+
+// history is ORDERED: index 0 is the first pick of the draft. {n:name, m:true if mine}
+let history = [];
+try { history = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e){ history=[]; }
+if(!history.length){                                   // migrate the old drafted-only format
+  try {
+    const old = JSON.parse(localStorage.getItem(OLDKEY) || '[]');
+    history = old.map(n => ({n:n, m:false}));
+  } catch(e){}
+}
+let takenSet = new Set(), mineList = [];
+function reindex(){
+  takenSet = new Set(history.map(h=>h.n));
+  mineList = history.filter(h=>h.m).map(h=>h.n);
+}
+reindex();
+const POOLBY = {}; POOL.forEach(p=>{ POOLBY[p.name]=p; });
+
+let pos='ALL', rnd='ALL', sortK='rank', sortDir=1, valOnly=false, hideDrafted=false;
+const tb=document.getElementById('tb'), q=document.getElementById('q'), cnt=document.getElementById('count');
+const tabs=document.getElementById('tabs'), brief=document.getElementById('brief');
+
+const roundOf = r => Math.min(12, Math.ceil(r.rank/10));
+
+function buildTabs(){
+  let h='<button class="tab on" data-r="ALL">All<span class="tn">120 players</span></button>';
+  for(let i=1;i<=12;i++){
+    const n=DATA.filter(r=>roundOf(r)===i).length;
+    const lbl = i===12 ? 'R12+' : 'R'+i;
+    h+='<button class="tab" data-r="'+i+'">'+lbl+'<span class="tn">'+n+' players</span></button>';
+  }
+  h+='<button class="tab" data-r="SIM">Simulator<span class="tn">Monte Carlo</span></button>';
+  tabs.innerHTML=h;
+  tabs.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+    rnd = (b.dataset.r==='ALL'||b.dataset.r==='SIM') ? b.dataset.r : +b.dataset.r;
+    tabs.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+    const isSim = (rnd==='SIM');
+    document.getElementById('simpanel').style.display = isSim ? '' : 'none';
+    document.querySelector('.controls').style.display = isSim ? 'none' : '';
+    document.getElementById('tbl').style.display     = isSim ? 'none' : '';
+    brief.style.display = isSim ? 'none' : '';
+    if(!isSim){ setBrief(); render(); }
+  }));
+}
+function setBrief(){
+  const b=ROUND_BRIEF[rnd] || ROUND_BRIEF.ALL;
+  brief.innerHTML='<span class="bl">'+b[0]+'</span>'+b[1];
+}
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(history)); reindex(); }
+
+const SIMSLOTS = { QB:1, RB:2, WR:3, TE:1, FLEX:1, K:1, DEF:1 };
+
+function mySlot(){ return +document.getElementById('simSlot').value || 1; }
+function myPickList(){
+  const t=10, out=[];
+  for(let r=1;r<=15;r++) out.push((r-1)*t + (r%2===1 ? mySlot() : t-mySlot()+1));
+  return out;
+}
+
+// st: null (available) | 'taken' | 'mine'
+function setState(name, st){
+  if(!name) return;
+  const i = history.findIndex(h=>h.n===name);
+  if(st===null){ if(i>=0) history.splice(i,1); }
+  else if(i>=0){ history[i].m = (st==='mine'); }        // switch side, keep draft position
+  else { history.push({n:name, m:(st==='mine')}); }
+  save(); render();
+}
+function stateOf(name){
+  const h=history.find(x=>x.n===name);
+  return h ? (h.m?'mine':'taken') : null;
+}
+function markPlayer(name, isMine){                      // toggle (keyboard + buttons)
+  if(!name) return false;
+  const cur=stateOf(name), want=isMine?'mine':'taken';
+  setState(name, cur===want ? null : want);
+  return true;
+}
+function undoMark(){ if(history.length){ history.pop(); save(); render(); } }
+
+function renderTracker(){
+  const made = history.length, next = made+1;
+  const picks = myPickList();
+  const upcoming = picks.filter(p=>p>made);
+  const st = document.getElementById('trkState');
+  if(!made){
+    st.innerHTML = 'Draft not started &middot; your first pick is <b>#'+picks[0]+'</b>';
+  } else if(upcoming.length && upcoming[0]===next){
+    st.innerHTML = '<span class="onclock">You are on the clock &mdash; pick #'+next+'</span>';
+  } else if(upcoming.length){
+    const away = upcoming[0]-next;
+    st.innerHTML = 'Pick <b>#'+next+'</b> is up &middot; '
+      + '<span class="'+(away<=2?'soon':'')+'">'+away+' pick'+(away===1?'':'s')
+      + ' until yours (#'+upcoming[0]+')</span>';
+  } else {
+    st.innerHTML = '<b>'+made+'</b> picks recorded &middot; your draft is complete';
+  }
+  const have = {QB:0,RB:0,WR:0,TE:0,K:0,DEF:0};
+  mineList.forEach(n=>{ const p=POOLBY[n]; if(p) have[p.pos]=(have[p.pos]||0)+1; });
+  let flexUsed=0; ['RB','WR','TE'].forEach(k=>{ flexUsed += Math.max(0, have[k]-SIMSLOTS[k]); });
+  let h='';
+  ['QB','RB','WR','TE','K','DEF'].forEach(k=>{
+    const need=SIMSLOTS[k], got=have[k]||0;
+    const cls = got>=need ? 'full' : (got===0 ? 'need' : '');
+    h += '<span class="rslot '+cls+'">'+k+' '+got+'/'+need+'</span>';
+  });
+  h += '<span class="rslot '+(flexUsed>=1?'full':'need')+'">FLEX '+Math.min(flexUsed,1)+'/1</span>';
+  h += '<span class="rslot">'+mineList.length+' drafted &middot; '+(15-mineList.length)+' left</span>';
+  document.getElementById('trkRoster').innerHTML=h;
+}
+
+function visible(){
+  const s=q.value.trim().toLowerCase();
+  return DATA.filter(r=>{
+    if(rnd!=='ALL' && roundOf(r)!==rnd) return false;
+    if(pos!=='ALL' && r.pos!==pos) return false;
+    if(valOnly && r.tag!=='value') return false;
+    if(hideDrafted && takenSet.has(r.name)) return false;
+    if(s && !(r.name.toLowerCase().includes(s)||r.team.toLowerCase().includes(s))) return false;
+    return true;
+  });
+}
+
+function render(){
+  const rows=visible().slice().sort((a,b)=>{
+    let x=a[sortK], y=b[sortK];
+    if(typeof x==='string') return x.localeCompare(y)*sortDir;
+    return (x-y)*sortDir;
+  });
+  let html='', lastBand=null;
+  const natural = (sortK==='rank' && sortDir===1 && rnd==='ALL');
+  for(const r of rows){
+    if(natural){
+      const band=Math.ceil(r.rank/10);
+      if(band!==lastBand){
+        lastBand=band;
+        const lbl = band<=12 ? 'Round '+band : 'Round 13+ / depth';
+        html+='<tr><td colspan="11" class="rowband">'+lbl+'</td></tr>';
+      }
+    }
+    const dcls = r.delta>=8?'pos-d':(r.delta<=-8?'neg-d':'');
+    const dstr = (r.delta>0?'+':'')+r.delta;
+    let injHtml='';
+    if(r.inj){
+      const bad=/ACL|Achilles|PUP|DNR|Surgery/i.test(r.inj+' '+r.part);
+      injHtml='<div class="inj'+(bad?' bad':'')+'">'+r.inj+(r.part?' &middot; '+r.part:'')+'</div>';
+    }
+    const tagHtml = r.tag? '<span class="tag '+r.tag+'">'+(r.tag==='hardfade'?'avoid':r.tag)+'</span>':'';
+    const hh = history.find(x=>x.n===r.name);
+    const isMine = !!(hh && hh.m), isTaken = !!(hh && !hh.m);
+    const stcls = isMine ? 'mine' : (isTaken ? 'taken' : '');
+    const nmEsc = r.name.replace(/"/g,'&quot;');
+    html+='<tr data-n="'+nmEsc+'" class="'+stcls+'">'
+      +'<td class="mk"><input type="checkbox" class="ckT" aria-label="Taken by someone else"'
+        +' title="Taken by someone else"'+(isTaken?' checked':'')+'></td>'
+      +'<td class="mk"><input type="checkbox" class="ckM" aria-label="Drafted by me"'
+        +' title="Drafted by me"'+(isMine?' checked':'')+'></td>'
+      +'<td class="rk">'+r.rank+'</td>'
+      +'<td><span class="nm">'+r.name+'</span>'+injHtml+'</td>'
+      +'<td><span class="pos '+r.pos+'">'+r.pos+'</span></td>'
+      +'<td class="tm">'+r.team+'</td>'
+      +'<td class="adp">'+r.adp.toFixed(1)+'<small>'+r.adpr+'</small></td>'
+      +'<td class="rtg">'+r.rtg+'</td>'
+      +'<td class="dl '+dcls+'">'+dstr+'</td>'
+      +'<td class="tm">'+r.bye+'</td>'
+      +'<td class="note">'+tagHtml+r.note+'</td>'
+      +'</tr>';
+  }
+  tb.innerHTML=html;
+  const tot = (rnd==='ALL') ? DATA.length : DATA.filter(r=>roundOf(r)===rnd).length;
+  cnt.textContent = rows.length+' of '+tot+' shown · '+takenSet.size+' off the board · '
+                  + mineList.length+' mine';
+  renderTracker();
+}
+
+// checkboxes are the primary control; they must not also fire the row handler
+tb.addEventListener('change',e=>{
+  const el=e.target;
+  if(!el.matches || !el.matches('input.ckT, input.ckM')) return;
+  const tr=el.closest('tr[data-n]'); if(!tr) return;
+  const name=tr.dataset.n, mine=el.classList.contains('ckM');
+  if(el.checked) setState(name, mine ? 'mine' : 'taken');
+  else setState(name, null);
+});
+tb.addEventListener('click',e=>{
+  if(e.target.closest('td.mk')) return;              // let the checkbox handle itself
+  const tr=e.target.closest('tr[data-n]'); if(!tr) return;
+  const name=tr.dataset.n, cur=stateOf(name);
+  if(e.shiftKey){ setState(name, cur==='mine' ? null : 'mine'); return; }
+  setState(name, cur===null ? 'taken' : (cur==='taken' ? 'mine' : null));
+});
+
+// top visible row = what Enter acts on
+function topMatch(){ const v=visible(); return v.length ? v[0].name : null; }
+function markTop(isMine){
+  const n=topMatch();
+  if(!n) return;
+  markPlayer(n, isMine);
+  q.value=''; render(); q.focus();
+}
+q.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); markTop(e.shiftKey); }
+});
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); undoMark(); }
+});
+document.getElementById('mkThem').addEventListener('click',()=>markTop(false));
+document.getElementById('mkMine').addEventListener('click',()=>markTop(true));
+document.getElementById('mkUndo').addEventListener('click',undoMark);
+document.querySelectorAll('[data-pos]').forEach(b=>b.addEventListener('click',()=>{
+  pos=b.dataset.pos;
+  document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x===b));
+  render();
+}));
+document.querySelectorAll('th.s').forEach(th=>th.addEventListener('click',()=>{
+  const k=th.dataset.k;
+  if(sortK===k) sortDir*=-1; else { sortK=k; sortDir = (k==='rtg'||k==='delta')?-1:1; }
+  render();
+}));
+document.getElementById('fVal').addEventListener('click',e=>{
+  valOnly=!valOnly; e.target.classList.toggle('on',valOnly); render();
+});
+document.getElementById('fHide').addEventListener('click',e=>{
+  hideDrafted=!hideDrafted; e.target.classList.toggle('on',hideDrafted); render();
+});
+document.getElementById('reset').addEventListener('click',()=>{
+  if(!confirm('Clear the whole recorded draft ('+history.length+' picks)?')) return;
+  history=[]; save();
+  q.value=''; pos='ALL'; rnd='ALL'; valOnly=false; hideDrafted=false; sortK='rank'; sortDir=1;
+  document.querySelectorAll('.btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('[data-pos="ALL"]').classList.add('on');
+  tabs.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.r==='ALL'));
+  setBrief(); render();
+});
+q.addEventListener('input',render);
+buildTabs(); setBrief(); render();
+</script>
+</body>
+</html>
