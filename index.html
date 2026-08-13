@@ -43,6 +43,16 @@ h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;margin:0 0 8px;font-weig
 ul{margin:8px 0;padding-left:20px}
 li{margin:5px 0}
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.srcline{margin:12px 0 0;font-size:12.5px;color:var(--dim);line-height:1.7}
+.srcline b{color:var(--ink);font-weight:650}
+.srcline .what{color:var(--dim)}
+.srcline a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line)}
+.srcline a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.srcdot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);
+ margin-right:6px;vertical-align:1px}
+.provenance{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+.provenance h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);
+ font-weight:700;margin:0 0 10px}
 /* section nav */
 .secnav{display:flex;gap:6px;flex-wrap:wrap;margin:22px 0 4px;padding-bottom:0;
  border-bottom:1px solid var(--line)}
@@ -304,14 +314,15 @@ details.dlog[open]>summary::before{content:"▾ "}
   <h1>2026 Fantasy Draft Board</h1>
   <p class="sub">Set your league format below &mdash; ADP, projections and the simulator all follow it.</p>
   <div class="pills">
-    <span class="pill">Market data <b>Fantasy Football Calculator</b></span>
-    <span class="pill"><b>2,214</b> drafts sampled</span>
-    <span class="pill">Window <b>2026-08-08 &rarr; 2026-08-13</b></span>
-    <span class="pill">Injuries cross-checked vs <b>Sleeper</b></span>
-    <span class="pill"><b>120</b> players ranked</span>
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 4:09 PM</b></span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 13, 4:12 PM</b></span>
     <span class="pill" id="pillLeague"></span>
   </div>
+  <p class="srcline">
+    <span class="srcdot"></span><b><a href="https://fantasyfootballcalculator.com/adp" target="_blank" rel="noopener">Fantasy Football Calculator</a></b>
+    <span class="what">&mdash; the draft market: ADP, round/pick, draft-position variance</span><br>
+    <span class="srcdot"></span><b><a href="https://sleeper.com" target="_blank" rel="noopener">Sleeper</a></b>
+    <span class="what">&mdash; season point projections, injury designations, teams and byes</span>
+  </p>
   <div class="hdrctl">
     <button class="btn" id="btnTheme" title="Cycle appearance: auto, light, dark">Auto</button>
     <button class="btn" id="btnDensity" title="Toggle row height">Comfortable</button>
@@ -515,7 +526,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T16:05:09</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-13T16:09:33</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -534,7 +545,18 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 <footer>
   <p><b>How to use this page.</b> Use the <b>round tabs</b> to see only the players who should be on the table at that pick, with a strategy brief for each round. Click any row to mark a player drafted &mdash; it persists in this browser. Sort by any underlined column. <b>&Delta;</b> is market ADP minus my rank: <span style="color:var(--value);font-weight:600">positive means the player is falling to you</span>, negative means the market is paying up. Tabs, filters, and search all stack together.</p>
   <p><b>Ratings scale.</b> 90+ foundational &middot; 80&ndash;89 high-end starter &middot; 70&ndash;79 reliable starter &middot; 60&ndash;69 flex or upside swing &middot; 50&ndash;59 bench with a path &middot; below 50 speculative.</p>
-  <p><b>Caveat.</b> ADP and injury designations are a snapshot from <b>2026-08-13</b>. Preseason "Questionable" tags are mostly noise &mdash; the ones that matter are surgical (ACL, Achilles, PUP) and are flagged in red. Re-check those the morning of your draft.</p>
+  <div class="provenance">
+    <h3>Data provenance</h3>
+    <div class="pills">
+      <span class="pill">ADP from <b>2,214</b> real drafts</span>
+      <span class="pill">Sampling window <b>2026-08-08 &rarr; 2026-08-13</b></span>
+      <span class="pill"><b>4</b> scoring formats fetched</span>
+      <span class="pill"><b>267</b> players in the draft pool</span>
+      <span class="pill"><b>120</b> hand-ranked by me</span>
+      <span class="pill">Refreshed <b>hourly</b> by a background job</span>
+    </div>
+  </div>
+  <p style="margin-top:16px"><b>Caveat.</b> ADP and injury designations are a snapshot from <b>2026-08-13</b>. Preseason "Questionable" tags are mostly noise &mdash; the ones that matter are surgical (ACL, Achilles, PUP) and are flagged in red. Re-check those the morning of your draft.</p>
 </footer>
 </div>
 
