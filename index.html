@@ -244,11 +244,13 @@ body.capmode .capcol{display:table-cell}
   background:var(--bg);color:var(--ink);margin:0 0 10px;width:100%}
 
 .drlist{display:flex;flex-direction:column;gap:2px}
-/* Roomy rows: 46px tall, tabular numbers, whole row is the hit target. */
-.drrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;
-  padding:11px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+/* Roomy rows, tabular numbers. The row is NOT clickable — the two buttons are the
+   only way to record a pick, so an off-target click does nothing instead of
+   recording the wrong player. */
+.drrow{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:12px;
+  align-items:center;padding:9px 10px;border-radius:10px;border:1px solid transparent}
+.drrow.sel{border-color:var(--line)}
 .drrow:hover{background:var(--bg)}
-.drrow.sel{border-color:var(--accent);background:var(--accentbg)}
 .drrow .drpos{font-size:11px;font-weight:800;padding:3px 7px;border-radius:5px;
   color:#fff;min-width:34px;text-align:center}
 .drrow .drnm{font-size:18px;font-weight:700;letter-spacing:-.01em;
@@ -263,25 +265,50 @@ body.capmode .capcol{display:table-cell}
   letter-spacing:.03em;text-transform:uppercase;color:var(--dim);margin-top:1px}
 .drrow.over{opacity:.42}
 .drrow.over .drpx{color:var(--fade)}
+/* Two clear actions per row. 40px tall and 74px wide so they are easy to hit
+   quickly, and visually distinct from each other so you never mix them up:
+   Mine is green (a gain), Taken is red-outlined (a loss). */
+.drbtns{display:flex;gap:6px}
+.drbtn{font-size:13.5px;font-weight:800;padding:10px 14px;border-radius:9px;
+  min-width:74px;cursor:pointer;border:2px solid var(--line);background:var(--card);
+  color:var(--dim);letter-spacing:.01em;line-height:1;
+  -webkit-appearance:none;appearance:none}
+.drbtn:hover{background:var(--bg)}
+.drbtn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accentbg);
+  border-color:var(--accent)}
+.drbtn:active{transform:translateY(1px)}
+.drbtn.taken:hover{border-color:var(--fade);color:var(--fade);background:var(--fadebg)}
+.drbtn.mine{border-color:var(--value);color:var(--value)}
+.drbtn.mine:hover{background:var(--value);color:#fff}
 .drempty{padding:18px 4px;color:var(--dim);font-size:14px}
 
 .drtrail{display:flex;flex-direction:column;gap:4px}
-.drtr{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
-  padding:9px 11px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;
+.drtr{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;
+  padding:8px 10px;border-radius:9px;font-size:15px;font-weight:700;
   border:1px solid var(--line);background:var(--bg)}
-.drtr:hover{border-color:var(--fade)}
 .drtr .drwho{font-size:10.5px;font-weight:800;letter-spacing:.05em;
   text-transform:uppercase;padding:3px 7px;border-radius:5px}
 .drtr.mine .drwho{background:var(--valuebg);color:var(--value)}
 .drtr.taken .drwho{background:var(--fadebg);color:var(--fade)}
 .drtr .drcost{font-variant-numeric:tabular-nums;color:var(--dim);font-size:13.5px}
 .drtr .drnm2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Undo is an explicit button too. Clicking the row used to undo it, which made an
+   accidental click silently delete a pick you had correctly recorded. */
+.drundo{font-size:11.5px;font-weight:800;padding:6px 10px;border-radius:7px;
+  cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--dim);
+  -webkit-appearance:none;appearance:none}
+.drundo:hover{border-color:var(--fade);color:var(--fade);background:var(--fadebg)}
 
 @media(max-width:820px){
   .drgrid{grid-template-columns:1fr}
   .drstat{font-size:23px;padding:14px 16px}
   #dq{font-size:22px}
   .drmoney .big{font-size:22px}
+  /* Five columns don't fit narrow, so the name takes the first line and the numbers
+     and buttons sit beneath it rather than being squeezed. */
+  .drrow{grid-template-columns:auto 1fr auto;row-gap:8px}
+  .drrow .drbtns{grid-column:1 / -1;justify-content:flex-end}
+  .drbtn{padding:12px 18px;min-width:88px;font-size:14.5px}
 }
 .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;
  padding:2px 6px;border-radius:4px;text-transform:uppercase;margin-right:6px;white-space:nowrap}
@@ -412,7 +439,7 @@ details.dlog[open]>summary::before{content:"▾ "}
   <h1>2026 Fantasy Draft Board</h1>
   <p class="sub">Set your league format below &mdash; ADP, projections and the simulator all follow it.</p>
   <div class="pills">
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 26, 2:52 PM</b> &middot; updates hourly</span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 26, 3:03 PM</b> &middot; updates hourly</span>
     <span class="pill" id="pillLeague"></span>
   </div>
   <p class="srcline">
@@ -620,13 +647,11 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 
   <div class="drsearch">
     <input id="dq" type="search" autocomplete="off" spellcheck="false"
-           placeholder="Type a name…" aria-label="Find a player to mark">
+           placeholder="Type a name to find them…" aria-label="Find a player to mark">
     <div class="drkeys">
-      <span><kbd>Enter</kbd> someone else took them</span>
-      <span><kbd>&#8679;</kbd>+<kbd>Enter</kbd> I took them</span>
-      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> choose</span>
-      <span><kbd>Esc</kbd> clear</span>
-      <span><kbd>&#8984;</kbd>+<kbd>Z</kbd> undo</span>
+      <span>Type to narrow the list, then click <b>Taken</b> or <b>Mine</b> on the row.</span>
+      <span><kbd>Esc</kbd> clears the box</span>
+      <span><kbd>&#8984;</kbd>+<kbd>Z</kbd> undoes the last mark</span>
     </div>
   </div>
 
@@ -734,7 +759,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-26T14:50:31</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-26T15:02:26</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
@@ -1966,11 +1991,15 @@ function renderDraft(){
     cands.slice(0,DR_LIST_MAX).forEach((c,i)=>{
       const p=c.p;
       const inj = p.rm<1 ? ' &middot; injury risk' : '';
+      const nm = p.name.replace(/"/g,'&quot;');
       // VOR is the headline number in both modes because it is what ranks the list.
       // In cap mode the price sits beside it, with value-per-dollar underneath so a
       // bargain is visible without having to switch the sort.
-      h+='<div class="drrow'+(i===drSel?' sel':'')+(c.over?' over':'')
-        +'" data-n="'+p.name.replace(/"/g,'&quot;')+'">'
+      //
+      // Marking is by explicit button only. A whole-row click used to record a pick,
+      // which made a mis-aimed click indistinguishable from an intended one — the
+      // exact mistake this tab exists to prevent.
+      h+='<div class="drrow'+(i===drSel?' sel':'')+(c.over?' over':'')+'" data-n="'+nm+'">'
         +'<span class="drpos" style="background:'+drPosColour(p.pos)+'">'+p.pos+'</span>'
         +'<span class="drnm">'+p.name
           +'<small>'+p.team+' &middot; bye '+p.bye+' &middot; '+Math.round(c.pts)+' pts'+inj+'</small></span>'
@@ -1978,6 +2007,12 @@ function renderDraft(){
           +'<small>over repl</small></span>'
         +(cap?('<span class="drpx">$'+c.cost
               +'<small>'+(c.over?'over budget':c.ppd.toFixed(1)+' /$')+'</small></span>'):'')
+        +'<span class="drbtns">'
+          +'<button type="button" class="drbtn taken" data-act="taken" data-n="'+nm+'"'
+            +' title="Someone else drafted '+nm+'">Taken</button>'
+          +'<button type="button" class="drbtn mine" data-act="mine" data-n="'+nm+'"'
+            +' title="I drafted '+nm+'">Mine</button>'
+        +'</span>'
         +'</div>';
     });
     box.innerHTML=h;
@@ -1994,10 +2029,12 @@ function renderDraft(){
     for(let i=history.length-1;i>=Math.max(0,history.length-DR_TRAIL_MAX);i--){
       const hh=history[i], p=POOLBY[hh.n];
       const c=(hh.c!==undefined&&hh.c!==null)?hh.c:null;
-      h+='<div class="drtr '+(hh.m?'mine':'taken')+'" data-i="'+i+'" title="Click to undo">'
+      h+='<div class="drtr '+(hh.m?'mine':'taken')+'">'
         +'<span class="drwho">'+(hh.m?'mine':'taken')+'</span>'
         +'<span class="drnm2">'+hh.n+(p?' <small>'+p.pos+'</small>':'')+'</span>'
         +'<span class="drcost">'+(cap&&c!==null?'$'+c:'#'+(i+1))+'</span>'
+        +'<button type="button" class="drundo" data-i="'+i+'"'
+          +' title="Undo this mark">Undo</button>'
         +'</div>';
     }
     trail.innerHTML=h;
@@ -2020,24 +2057,16 @@ function renderDraft(){
   document.getElementById('drSlots').innerHTML=sh;
 }
 
-// Mark whichever row is selected. Returns the name so the caller can report it.
-function drMark(isMine){
-  const cands=drCandidates();
-  const c=cands[drSel];
-  if(!c) return null;
-  const nm=c.p.name;
-  setState(nm, isMine?'mine':'taken');
+// Record a pick by name. The Taken / Mine buttons are the only callers, so there is
+// exactly one path from a click to a recorded pick.
+function drRecord(name, isMine){
+  if(!name) return null;
+  setState(name, isMine?'mine':'taken');
+  drSel=0;
   const d=document.getElementById('dq');
   if(d){ d.value=''; d.focus(); }
-  drSel=0;
   renderDraft();
-  return nm;
-}
-function drMove(delta){
-  const n=drCandidates().length;
-  if(!n) return;
-  drSel=Math.max(0,Math.min(n-1,drSel+delta));
-  renderDraft();
+  return name;
 }
 
 // which starting positions do I still have open?
@@ -2435,30 +2464,28 @@ if(capThawBtn) capThawBtn.addEventListener('click',()=>{
 // ---------- Draft Room wiring ----------
 const dq=document.getElementById('dq');
 if(dq){
-  // Re-rank on every keystroke, and always reset to the top match so Enter is
-  // predictable — you should never have to look at which row is selected.
   dq.addEventListener('input',()=>{ drSel=0; renderDraft(); });
   dq.addEventListener('keydown',e=>{
     const k=e.key;
-    if(k==='Enter'){ e.preventDefault(); drMark(e.shiftKey); return; }
-    if(k==='ArrowDown'){ e.preventDefault(); drMove(1); return; }
-    if(k==='ArrowUp'){ e.preventDefault(); drMove(-1); return; }
+    // Enter deliberately does NOT record a pick. It used to mark whichever row was
+    // top of the list, which meant a mistyped search plus a reflexive Enter recorded
+    // the wrong player — and a wrong mark is worse than a slow one, because you carry
+    // on believing someone is gone. Marking is by button, on the row you can see.
+    if(k==='Enter'){ e.preventDefault(); return; }
     if(k==='Escape'){ e.preventDefault(); dq.value=''; drSel=0; renderDraft(); return; }
   });
 }
 const drT=document.getElementById('drTargets');
 if(drT) drT.addEventListener('click',e=>{
-  const row=e.target.closest('.drrow[data-n]');
-  if(!row) return;
-  // Shift-click records it as yours, matching the board's convention.
-  setState(row.dataset.n, e.shiftKey?'mine':'taken');
-  drSel=0; renderDraft();
+  const btn=e.target.closest('button.drbtn[data-act]');
+  if(!btn) return;                       // clicking the row itself does nothing
+  drRecord(btn.dataset.n, btn.dataset.act==='mine');
 });
 const drTr=document.getElementById('drTrail');
 if(drTr) drTr.addEventListener('click',e=>{
-  const row=e.target.closest('.drtr[data-i]');
-  if(!row) return;
-  const i=+row.dataset.i;
+  const btn=e.target.closest('button.drundo[data-i]');
+  if(!btn) return;
+  const i=+btn.dataset.i;
   if(i>=0 && i<history.length){ history.splice(i,1); save(); renderDraft(); }
 });
 const drM=document.getElementById('drMetric');
