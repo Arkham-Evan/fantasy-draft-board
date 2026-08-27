@@ -533,7 +533,7 @@ details.dlog[open]>summary::before{content:"▾ "}
   <h1>2026 Fantasy Draft Board</h1>
   <p class="sub">Set your league format below &mdash; ADP, projections and the simulator all follow it.</p>
   <div class="pills">
-    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 27, 11:12 AM</b> &middot; updates hourly</span>
+    <span class="pill" style="border-color:var(--accent)">Refreshed <b>Aug 27, 11:37 AM</b> &middot; updates hourly</span>
     <span class="pill" id="pillLeague"></span>
   </div>
   <p class="srcline">
@@ -740,7 +740,7 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
   <th class="s capcol" data-k="espn" title="ESPN's auction value — what real ESPN auction leagues actually paid. Scoring-blind, quoted on $200 / 10 teams">ESPN&nbsp;$</th>
   <th class="s capcol" data-k="fp" title="FantasyPros' salary-cap calculator, computed for your teams / scoring / roster shape">FP&nbsp;$</th>
   <th class="s capcol" data-k="ours" title="What we think they're worth: projected points over replacement, converted to dollars against the league's whole budget, then adjusted for inflation as the auction runs">Ours&nbsp;$</th>
-  <th class="s capcol" data-k="edge" title="Ours minus the market. Positive means the market is underpricing them — that's a buy">Edge</th>
+  <th class="s capcol" data-k="edge" title="How this player is priced against the market's typical discount to our valuation, in dollars. Positive means the market is charging less for them than for a comparable player, which is a buy. It is NOT ours minus the market — that reads as a bargain on every good player, because our list is more top-heavy than the market's">Edge</th>
   <th class="s" data-k="rtg">Rtg</th>
   <th class="s" data-k="delta">&Delta;</th>
   <th class="s" data-k="bye">Bye</th>
@@ -926,12 +926,12 @@ Keyboard: <kbd>&uarr;</kbd><kbd>&darr;</kbd> move the highlight, <kbd>Space</kbd
 
 <div class="card chg">
   <h2>Changed since last refresh</h2>
-  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-27T10:12:09</p>
+  <p class="sub" style="margin:-4px 0 14px">Previous snapshot: 2026-08-27T11:12:48</p>
   <div class="grid">
     <div>
       <h3>New injury designations</h3><p class="none">No new injuries reported.</p>
       <h3>Injuries cleared</h3><p class="none">None cleared.</p>
-      <h3>Injury status changed</h3><ul><li><b>Alec Pierce</b> (WR, IND) &mdash; PUP &middot; Ankle &rarr; <b>Questionable &middot; Ankle</b></li></ul>
+      <h3>Injury status changed</h3><p class="none">No status changes.</p>
     </div>
     <div>
       <h3>ADP movers (&ge;5 picks)</h3><p class="none">No meaningful ADP movement.</p>
@@ -3790,8 +3790,10 @@ if(aucWin) aucWin.addEventListener('click',e=>{
   }
   const px=Math.max(0, Math.round(+raw));
   const name=onBlock;
-  recordSale(name, +btn.dataset.seat, px);
+  // Clear the block BEFORE recording, or the redraw inside recordSale paints a panel for
+  // a player who has just been sold.
   onBlock=null;
+  recordSale(name, +btn.dataset.seat, px);
   const d=document.getElementById('dq');
   if(d){ d.value=''; d.focus(); }
   renderDraft();
